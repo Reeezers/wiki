@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Muck and Makers (Update 14) wiki – Endless Space 2 localization</title>
+<style>
+:root{--bg:#c0c0c0;--fg:#000;--mut:#404040;--card:#fff;--bd:#808080;--acc:#000080;--tok:#ffffcc;color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font:13px/1.4 Tahoma,"MS Sans Serif",Verdana,Arial,sans-serif}
+h1,h2,h3,h4{font-family:Tahoma,"MS Sans Serif",Verdana,Arial,sans-serif;line-height:1.2;margin:0}
+header{padding:8px;max-width:1500px;margin:auto}
+h1{font-size:15px;background:#000080;color:#fff;padding:3px 6px;margin:0}
+.sub{color:var(--fg);margin:0 0 8px;max-width:none;background:var(--bg);border:2px solid;border-color:#fff #404040 #404040 #fff;border-top:0;padding:6px 8px}
+.bar{display:flex;flex-wrap:wrap;gap:8px;align-items:flex-end;padding-bottom:0}
+.tabs{display:flex;gap:2px;flex-wrap:wrap}
+.tabs a{padding:4px 12px;color:var(--fg);text-decoration:none;font-weight:normal;background:var(--bg);border:2px solid;border-color:#fff #404040 #404040 #fff}
+.tabs a.on{background:#000080;color:#fff;border-color:#404040 #fff #fff #404040}
+#q{margin-left:auto;min-width:220px;padding:3px 5px;border:2px solid;border-color:#404040 #fff #fff #404040;border-radius:0;background:#fff;color:#000;font:inherit}
+a:focus-visible,button:focus-visible,input:focus-visible,summary:focus-visible{outline:1px dotted #000;outline-offset:-4px}
+main{max-width:1500px;margin:auto;padding:8px 8px 40px}
+section[hidden]{display:none}
+.note{background:#ffffe1;border:1px solid #000;padding:6px 8px;color:#000;margin-bottom:10px;max-width:90ch}
+.legend{display:flex;flex-wrap:wrap;gap:4px 14px;margin:0 0 8px;font-size:12px;color:var(--fg)}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:0;background:var(--c);margin-right:5px;border:1px solid #000}
+.grid{display:grid;grid-template-columns:minmax(0,1fr) 440px;gap:10px;align-items:start}
+@media(max-width:1100px){.grid{grid-template-columns:1fr}}
+.mapwrap{overflow:auto;border:2px solid;border-color:#404040 #fff #fff #404040;border-radius:0;background:#fff}
+#map{position:relative}
+#map svg{position:absolute;inset:0}
+.ed{fill:none;stroke:#000;stroke-width:1;opacity:.6}
+.ed.w{stroke-dasharray:3 3}
+.ed.on{stroke:#000080;opacity:1;stroke-width:2}
+.nd{position:absolute;width:156px;height:62px;text-align:left;padding:5px 6px 5px 8px;border:2px solid;border-color:#fff #404040 #404040 #fff;border-left:6px solid var(--c);border-radius:0;background:var(--bg);color:var(--fg);font:inherit;cursor:pointer;overflow:hidden}
+.nd:active{border-color:#404040 #fff #fff #404040;border-left:6px solid var(--c)}
+.nd small{display:block;color:var(--mut);font-size:11px;line-height:1.2}
+.nd b{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;font-size:12px;line-height:1.25}
+.nd.dim{opacity:.4}
+.nd.sel{box-shadow:none;border-color:#404040 #fff #fff #404040;border-left:6px solid var(--c);background:#000080;color:#fff}
+.nd.sel small{color:#fff}
+#det{background:var(--bg);border:2px solid;border-color:#fff #404040 #404040 #fff;border-radius:0;padding:10px;position:sticky;top:10px;max-height:calc(100vh - 20px);overflow:auto}
+@media(max-width:1100px){#det{position:static;max-height:none}}
+.kick{color:#000080;font-weight:700;font-size:12px;margin-bottom:4px}
+#det h2{font-size:16px;margin-bottom:8px;background:#000080;color:#fff;padding:3px 6px}
+#det p{margin:0 0 8px;max-width:68ch}
+.ch{background:#fff;border:2px solid;border-color:#404040 #fff #fff #404040;border-left:6px solid var(--c);border-radius:0;padding:8px 10px;margin:10px 0}
+.ch h3{font-size:14px;margin-bottom:6px}
+.row{margin:5px 0;font-size:13px}
+.row span{display:inline-block;font-size:11px;font-weight:700;color:var(--mut);margin-right:6px;text-transform:uppercase}
+.row.bad span{color:#c00000}.row.ok span{color:#006000}
+.tok{font-style:normal;background:var(--tok);border:1px solid #808080;border-radius:0;padding:0 4px;font-weight:700}
+.kw{color:#000080}
+.lnk{list-style:square;padding:0 0 0 18px;margin:6px 0}
+.lnk li{margin:4px 0;font-size:13px}
+.lnk em{display:block;color:var(--mut);font-style:normal;font-size:12px}
+h4{margin:14px 0 4px;font-size:13px;border-bottom:1px solid #808080;padding-bottom:2px}
+a{color:#0000ee}
+a:visited{color:#551a8b}
+.cols{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:8px}
+.card{background:#fff;border:2px solid;border-color:#404040 #fff #fff #404040;border-radius:0;padding:8px 10px}
+.card h3{font-size:14px;margin-bottom:2px;color:#000080}
+.card .tag{color:var(--mut);font-size:12px;margin-bottom:6px;font-style:italic}
+.card p{margin:0 0 6px;font-size:13px}
+.eff{font-weight:700;color:#006000;font-size:13px}
+.chip{display:inline-block;margin:2px 4px 0 0;padding:1px 7px;background:var(--bg);border:2px solid;border-color:#fff #404040 #404040 #fff;border-radius:0;font-size:12px;text-decoration:none;color:#000}
+h2.sec{margin:18px 0 8px;font-size:14px;background:#000080;color:#fff;padding:3px 6px}
+.rw{background:#fff;border:2px solid;border-color:#404040 #fff #fff #404040;border-radius:0;padding:5px 8px;margin:5px 0;cursor:pointer}
+.rw code{font-family:"Courier New",monospace;font-size:12px;color:var(--mut);word-break:break-all}
+.rw div{margin-top:3px;font-size:13px;white-space:pre-line;max-height:2.9em;overflow:hidden}
+.rw.open div{max-height:none}
+
+.layout{display:grid;grid-template-columns:260px minmax(0,1fr);gap:10px;align-items:start}
+@media(max-width:800px){.layout{grid-template-columns:1fr}}
+#cats{background:#fff;border:2px solid;border-color:#404040 #fff #fff #404040;position:sticky;top:10px;max-height:calc(100vh - 20px);overflow:auto;padding:2px}
+@media(max-width:800px){#cats{position:static;max-height:200px}}
+#cats a{display:flex;justify-content:space-between;gap:6px;padding:2px 6px;color:#000;text-decoration:none}
+#cats a.on{background:#000080;color:#fff}
+#cats a small{opacity:.7;font-size:11px;align-self:center}
+.more{display:block;margin:10px 0;padding:4px 14px;font:inherit;color:#000;background:var(--bg);border:2px solid;border-color:#fff #404040 #404040 #fff;border-radius:0;cursor:pointer}
+.more:active{border-color:#404040 #fff #fff #404040}
+.card.big{grid-column:1/-1}
+.card .tag{font-family:"Courier New",monospace;font-style:normal;word-break:break-all}
+.card .row{white-space:pre-line}
+.empty{color:var(--mut);font-style:italic}
+h2.sec small{font-weight:normal;opacity:.85}
+.cols.one{grid-template-columns:repeat(auto-fill,minmax(340px,1fr))}
+.stat{display:block;color:var(--mut);font-size:12px;margin-bottom:6px}
+.back{display:inline-block;margin:0 0 6px}
+.rw a{font-size:12px;margin-left:6px}
+</style></head><body>
+<header>
+<a class="back" href="index.html">&laquo; All files</a>
+<h1>Muck and Makers (Update 14) wiki</h1>
+<p class="sub">Every string from <code>ES2_Localization_Update14_Locales.xml</code>: 69 strings in 19 entries, grouped by topic. Pick a topic on the Browse tab, or search every string.</p>
+<div class="bar"><nav class="tabs" id="tabs"></nav><input id="q" type="search" placeholder="Search every string…" aria-label="Search every string"></div>
+</header>
+<main>
+<section id="t-overview"><div class="note">The file holds text only, so entries are grouped by their key names: a key ending in Title, Description, Objective and so on is placed on the card of the entry it belongs to. Chips like <i class="tok">N<sub>1</sub></i> and <i class="tok">T</i> are numbers or names the game fills in, and <b class="kw">bold words</b> are in-game icons or keywords. Colour codes are stripped.</div></section>
+<section id="t-browse" hidden><div class="layout"><nav id="cats" aria-label="Topics"></nav><div id="catview"></div></div></section>
+<section id="t-raw" hidden><div class="note" id="rawn"></div><div id="rawl"></div></section>
+</main>
+<script>
+const D=[["HeroBasryxo01Title","Fore Sagazh Jabble",5],["HeroBasryxo01Description","Growing up, Jabble never quite had the wit and the reflexes to match their curiosity. Adolescence was one long series of accidents and hospitalizations as Jabble wandered into places they shouldn’t have and pulled on levers with large “Do Not Touch” signs. Finally, one day, fate turned against them, and Jabble found their way into a discarded engine core that had been used for testing a highly radioactive Dust-enhanced ramscoop. Assaulted by the forces that shape the boundaries of space-time, a wiser being might have died of terror and relentless perspective. Jabble simply thought, “Wow, cool”, and passed out. Upon awakening it was clear that they were no longer the same creature, but would have continued their carefree existence had not an explorer ship sent by Ighszraasz the Distrustful arrived to study the planet. Awed by the Academy and the incredible amount of neat stuff to check out, Jabble became a happy member of the society of Heroes.",5],["MinorFactionBasryxoTitle","Basryxo ",6],["MinorFactionBasryxoDescription","This society evolved in the detritus of what is essentially a garbage planet, as myriad forms of waste were dumped on the world for centuries. Whatever starfaring race created this ecological disaster we do not know, but eons after their passing a new sentient life—perhaps remnants of the original civilization, perhaps something else that evolved in the mutation-rich environment—came to be. Starting from ragged scavengers to become pragmatic and efficient recyclers, they have learned to turn garbage into gold. Any planet lucky enough to welcome them will quickly see the effectiveness of their methods for recovering resources.",6],["PopulationQuest27_Part1-IntroTitle","Munchie Madness",0],["PopulationQuest27_Part1-IntroDescription","The coolest, tastiest treat across the galaxy is a new fast food, Haroshuarm, a traditional snack of the Haroshem. The trend has taken settled planets like a storm, and anywhere you go you can buy or order a couple of pre-fermented slabs of this cheap, delicious fodder. Unfortunately, the incredible leap in take-out consumption has created vast quantities of garbage, exacerbated by the fact that decaying Haroshuarm turns into a corrosive gas. As a result, waste treatment plants and trash collection companies are staggering under mountains of cardboard and plastic rubbish that is slowly devolving into toxic waste. \nIt is a particular challenge for the Basryxo, who pride themselves on turning trash into treasure. Ths time, they may have met their match.",0],["PopulationQuest27_Part1-1Title","HAPPINESS",0],["PopulationQuest27_Part1-1Description","The masses are content? Let's keep them that way!",0],["PopulationQuest27_Part1-1ObjectiveTooltip","Your Empire Approval directly depends on the Approval of your Systems.",0],["PopulationQuest27_Part1-1Outcome","Nice work! Other than some minor side issues like obesity and flatulence, everybody is happy--except the Basryxo, who still can't figure out how to get rid of all the effluent.",0],["PopulationQuest27_Part1-1Objective","Have your Empire Approval [happinessColored] at $MinimumEmpireHappinessName or more for $HappinessDurationName [turnColored]",0],["PopulationQuest27_Part1-2ObjectiveTooltip","Winning epic battles is a good way to earn more Keii. Bring it on!",0],["PopulationQuest27_Part1-2Objective","Have your Obedience [obedienceColored] at $MinimumEmpireHonorName or more for $HonorDurationName [turnColored]",0],["PopulationQuest27_Part1-3Title","CLEANLINESS",0],["PopulationQuest27_Part1-3Description","The party is over, and it's time to clean up. Somebody has to be the responsible one...",0],["PopulationQuest27_Part1-3ObjectiveTooltip","You can unlock more Law slots by unlocking higher stages of the Empire Development technology quadrant.",0],["PopulationQuest27_Part1-3Outcome","Your Edict for Non-lethal Packaging and Waste Reduction has been a great success. The new recyclable, absorptive Haroshuarm boxes are a great help in reducing piles of waste, and the city streets are once again navigable. Rumor has it, however, that the natural curiosity of the Basryxo has driven them to finding a process to convert the old heaps of refuse into salt, hydrogen, carbon fiber, and chocolate.",0],["PopulationQuest27_Part1-3Objective","Have $EcologistLawAmountName active #B0C65D#Ecologist#REVERT# [ecologistColored] Laws for $EcologistLawDurationName [turnColored]",0],["PopulationQuest27_Part1-4Title","KINDNESS",0],["PopulationQuest27_Part1-4Description","Be magnanimous! If it's better food they want, give it to them.",0],["PopulationQuest27_Part1-4ObjectiveTooltip","You can increase Food production through Planetary and System Improvements, some Hero Skills, increased Population, and using Food-oriented Luxury Resources for System Upgrade projects.",0],["PopulationQuest27_Part1-4Outcome","What!? Those ingrates. You have showered them with food--almost literally--and now they are complaining about it. The only happy bunch are the cardiologists; all your other citizens are unhappy, and you need to deal with them.",0],["PopulationQuest27_Part1-4Objective","Produce at least $FoodObjectiveAmountName [foodColored] per turn in one System",0],["PopulationQuest27_Part2A-IntroTitle","Food Hangover",0],["PopulationQuest27_Part2A-IntroDescription","Hmmm. The masses may be happy, but the streets are a mess... There must be a clever way to fix this.",0],["PopulationQuest27_Part2A-1Title","CLEVERNESS",0],["PopulationQuest27_Part2A-1Description","You have a problem that needs fixing; and you might be able to science your way out of it....",0],["PopulationQuest27_Part2A-1ObjectiveTooltip","You can increase a system's Science output by building more Science-related Improvements.",0],["PopulationQuest27_Part2A-1Outcome","As the Basryxo say, \"Mind over muck\". By developing new systems for garbage removal, improved yeast strains, and self-cleaning sacks for the food, ecological disaster is avoided and the Haoshuarm craze continues. Grab a mallet, a chisel, and dig in!",0],["PopulationQuest27_Part2A-1Objective","Produce at least $ScienceObjectiveAmountName [scienceColored] per turn in one System",0],["PopulationQuest27_Part2A-2Title","EFFECTIVENESS",0],["PopulationQuest27_Part2A-2Description","You have a problem that needs fixing; maybe more waste collection and incineration capacity will do it.",0],["PopulationQuest27_Part2A-2ObjectiveTooltip","You can increase a system's Industry output by building more Industry-related Improvements.",0],["PopulationQuest27_Part2A-2Outcome","The volume of Haroshuarm-generated refuse has increased, but self-purging sidewalks, miniaturized incinerators, and orbital garbage strike technology takes care of it without worry. Your people are free to indulge, and the Basryxo can return to their lead/gold research.",0],["PopulationQuest27_Part2A-2Objective","Produce at least $IndustryObjectiveAmountName [industryColored] per turn in one System",0],["PopulationQuest27_Part2B-IntroTitle","Happy, but not Healthy",0],["PopulationQuest27_Part2B-IntroDescription","We managed to increase agricultural output. But now that the population has plenty to eat, they're starting to riot over the quality--and the health consequences.",0],["PopulationQuest27_Part2B-1Title","HEARTLESSNESS",0],["PopulationQuest27_Part2B-1Description","If they aren't on your planet, they can't make trouble. It's time for some good, old-fashioned press gangs.",0],["PopulationQuest27_Part2B-1ObjectiveTooltip","You can build the Ship, upgrade an already existing Ship, or buy one from the Marketplace",0],["PopulationQuest27_Part2B-1Outcome","Those who love Haroshuarm stay, and those who complain about it, well, they aren't in the news any more. Recruitment is up, unrest is down, and the Basryxo are wondering if they can turn all that glorious waste into orbital cities. Hmmmm....",0],["PopulationQuest27_Part2B-1Objective","Build, buy, or Assimilate a Ship with at least $ManpowerObjectiveAmountName [shipCrewColored]",0],["PopulationQuest27_Part2B-2Title","SURLINESS",0],["PopulationQuest27_Part2B-2Description","Take a lesson from the bestselling \"Craver Management Manual\", and oppress the complainers",0],["PopulationQuest27_Part2B-2ObjectiveTooltip","You can unlock more Law slots by unlocking higher stages of the Empire Development technology quadrant.",0],["PopulationQuest27_Part2B-2Outcome","You didn't make many friends, and the jails are running at capacity. But now the rule of law has been re-imposed, and there is a reason why it was relatively easy: After all, there is no Haroshuarm in prison.",0],["PopulationQuest27_Part2B-2Objective","Have $MilitaristLawAmountName active #B82738#Militarist#REVERT# [militaristColored] Laws for $MilitaristLawDurationName [turnColored]",0],["Update14Title","Muck and Makers",8],["FactionTraitMinorKeepItCoolManTitle","Pacific Proletariat",1],["FactionTraitMinorKeepItCoolManDescription","These workers toil even harder when they are not distracted by news of war and destruction.",1],["FactionTraitMinorRecycleKidsTitle","Bountiful Byproducts",1],["FactionTraitMinorRecycleKidsDescription","This population has a talent for creating goods that have more than one use.",1],["FactionTraitMinorBasryxoTitle","Basryxo Citizens",1],["FactionTraitMinorBasryxoTooltipEffect","+1 [basryxo] on your Home System",1],["FactionTraitMinorBasryxoDescription","The faction starts with Basryxo population on their home planet.",1],["AffinityBasryxoTitle","Basryxo",3],["AffinityBasryxoDescription","A meticulous, introspective people, the Basryxo focus on recycling, reuse, and the environment.",3],["LawP00PopulationCollectionBasryxoTitle","Edict for Extreme Measures in Extreme Settings",2],["LawP00PopulationCollectionBasryxoDescription","Given the already fragile ecosystems of certain planets, careful measures are taken to install and develop extreme and experimental agricultural techniques that are highly productive without undue environmental impact.",2],["LawP00PopulationCollectionBasryxoShortTitle","Footprint Formulary",2],["ClassPopulationEmpireAffinityBasryxoTitle","[basryxo]",4],["ClassPopulationStarSystemAffinityBasryxoTitle","Systems with [basryxo]",4],["SystemGrowthFromProductionTitle","[industryColored] transfered to [foodColored]",7],["PopulationBasryxoTitle","[basryxo]",0],["PopulationPoliticalFlatAffinityBasryxoTitle","Basryxo Population",0],["PopulationCollectionBonusBasryxo1","[basryxo] Collection Bonus I",0],["PopulationCollectionBonusBasryxo2","[basryxo] Collection Bonus II",0],["PopulationCollectionBonusBasryxo3","[basryxo] Collection Bonus III",0],["PopulationCollectionBonusBasryxo3_TooltipEffect","Unlocks \"Edict for Extreme Measures in Extreme Settings\" Law",0]];
+const E=[[5,"Hero Basryxo","HeroBasryxo01",[["Title",0],["Description",1]]],[6,"Minor Faction","MinorFactionBasryxo",[["Title",2],["Description",3]]],[0,"Population Quest","PopulationQuest27_Part1",[["IntroTitle",4],["IntroDescription",5],["1Title",6],["1Description",7],["1ObjectiveTooltip",8],["1Outcome",9],["1Objective",10],["2ObjectiveTooltip",11],["2Objective",12],["3Title",13],["3Description",14],["3ObjectiveTooltip",15],["3Outcome",16],["3Objective",17],["4Title",18],["4Description",19],["4ObjectiveTooltip",20],["4Outcome",21],["4Objective",22]]],[0,"Population Quest","PopulationQuest27_Part2A",[["IntroTitle",23],["IntroDescription",24],["1Title",25],["1Description",26],["1ObjectiveTooltip",27],["1Outcome",28],["1Objective",29],["2Title",30],["2Description",31],["2ObjectiveTooltip",32],["2Outcome",33],["2Objective",34]]],[0,"Population Quest","PopulationQuest27_Part2B",[["IntroTitle",35],["IntroDescription",36],["1Title",37],["1Description",38],["1ObjectiveTooltip",39],["1Outcome",40],["1Objective",41],["2Title",42],["2Description",43],["2ObjectiveTooltip",44],["2Outcome",45],["2Objective",46]]],[8,"Update","Update14",[["Title",47]]],[1,"Faction Trait","FactionTraitMinorKeepItCoolMan",[["Title",48],["Description",49]]],[1,"Faction Trait","FactionTraitMinorRecycleKids",[["Title",50],["Description",51]]],[1,"Faction Trait","FactionTraitMinorBasryxo",[["Title",52],["TooltipEffect",53],["Description",54]]],[3,"Affinity Basryxo","AffinityBasryxo",[["Title",55],["Description",56]]],[2,"Law P","LawP00PopulationCollectionBasryxo",[["Title",57],["Description",58],["ShortTitle",59]]],[4,"Class Population","ClassPopulationEmpireAffinityBasryxo",[["Title",60]]],[4,"Class Population","ClassPopulationStarSystemAffinityBasryxo",[["Title",61]]],[7,"System Growth","SystemGrowthFromProduction",[["Title",62]]],[0,"Population Basryxo","PopulationBasryxo",[["Title",63]]],[0,"Population Political","PopulationPoliticalFlatAffinityBasryxo",[["Title",64]]],[0,"Population Collection","PopulationCollectionBonusBasryxo1",[["Text",65]]],[0,"Population Collection","PopulationCollectionBonusBasryxo2",[["Text",66]]],[0,"Population Collection","PopulationCollectionBonusBasryxo3",[["Text",67],["TooltipEffect",68]]]];
+const C=[["Population",49],["Faction",7],["Law",3],["Affinity",2],["Class",2],["Hero",2],["Minor",2],["System",1],["Update",1]];
+const B=[["Muck and Makers",""]];
+
+const $=s=>document.querySelector(s);
+const esc=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+const cap=w=>{w=String(w).replace(/([a-z])([A-Z])/g,'$1 $2').replace(/([A-Za-z])(\d)/g,'$1 $2').replace(/(\d)([A-Za-z])/g,'$1 $2').replace(/[_-]+/g,' ').trim();return w?w[0].toUpperCase()+w.slice(1):w};
+function pretty(s){
+return esc(String(s||'').replace(/\\n/g,'\n'))
+.replace(/#[0-9a-fA-F]{6}#([\s\S]*?)#REVERT#/g,'$1').replace(/#[0-9a-fA-F]{6}#/g,'').replace(/#REVERT#/g,'')
+.replace(/\$Amount0?(\d+)Name/g,'<i class="tok">N<sub>$1</sub></i>').replace(/\$Timer/g,'<i class="tok">T</i>')
+.replace(/\$([A-Za-z]\w*)/g,(m,w)=>'<i class="tok">'+esc(cap(w.replace(/Name$/,'')||w))+'</i>')
+.replace(/\[turn\]/g,'turns')
+.replace(/\[(?:Strat\d+)?([\w-]+?)(?:Colored)?\]/g,(m,w)=>'<b class="kw">'+esc(cap(w))+'</b>')}
+const FLAB={Description:'Description',ShortTitle:'Short title',ShortDescription:'Short description',Tooltip:'Tooltip',TooltipTitle:'Tooltip title',TooltipDescription:'Tooltip',TooltipEffect:'Effect',TooltipEffectBis:'Effect (2)',Effect:'Effect',EffectOverride:'Effect override',Objective:'Objective',ObjectiveTooltip:'Hint',ObjectiveTitle:'Objective title',ObjectiveDescription:'Objective details',Outcome:'If completed',OutcomeFailed:'If failed',Failed:'If failed',Completed:'Completed',IntroTitle:'Intro title',IntroDescription:'Intro',RewardTitle:'Consequence',Text:'Text'};
+const FCLS={Outcome:'ok',Completed:'ok',OutcomeFailed:'bad',Failed:'bad'};
+const PREF=['IntroDescription','Description','ShortDescription','Objective','ObjectiveTitle','ObjectiveDescription','ObjectiveTooltip','Outcome','OutcomeFailed','Tooltip','TooltipDescription','TooltipEffect','TooltipEffectBis','Effect'];
+const BYCAT={};E.forEach(e=>(BYCAT[e[0]]=BYCAT[e[0]]||[]).push(e));
+const val=x=>D[x[1]][1];
+function head(e){const f=e[3];for(const k of ['Title','IntroTitle','ShortTitle']){const x=f.find(y=>y[0]===k&&val(y));if(x)return x}
+return f.find(y=>/Title$/.test(y[0])&&val(y))||null}
+function entryCard(e){const h=head(e),f=e[3].filter(x=>x!==h).map((x,i)=>[x,i]);
+f.sort((a,b)=>{const pa=PREF.indexOf(a[0][0]),pb=PREF.indexOf(b[0][0]);return (pa<0?100:pa)-(pb<0?100:pb)||a[1]-b[1]});
+let len=0,rows=f.map(([x])=>{const v=val(x);len+=v.length;const c=FCLS[x[0]]||'';
+return '<div class="row '+c+'"><span title="%'+esc(D[x[1]][0])+'">'+esc(FLAB[x[0]]||cap(x[0]))+'</span>'+(v.trim()?pretty(v):'<span class="empty">(empty)</span>')+'</div>'}).join('');
+return '<div class="card'+(f.length>8||len>1400?' big':'')+'"><h3>'+(h?pretty(val(h)):esc(cap(e[2])))+'</h3><div class="tag">%'+esc(e[2])+'</div>'+rows+'</div>'}
+const rawRow=(i,link)=>{const d=D[i];return '<div class="rw"><code>%'+esc(d[0])+'</code>'+(link&&C[d[2]]?' <a href="#c-'+d[2]+'">'+esc(C[d[2]][0])+'</a>':'')+'<div>'+esc(String(d[1]).replace(/\\n/g,'\n'))+'</div></div>'};
+const singleRow=x=>{const d=D[x[1]];return '<div class="rw"><code>%'+esc(d[0])+'</code><div>'+(d[1].trim()?pretty(d[1]):'<span class="empty">(empty)</span>')+'</div></div>'};
+let cur=0;const LIM=120,lim={};
+function renderCat(){const i=cur,es=BYCAT[i]||[],n=lim[i]||LIM,part=es.slice(0,n);
+const subs=new Map();part.forEach(e=>{if(!subs.has(e[1]))subs.set(e[1],[]);subs.get(e[1]).push(e)});
+let h='<h2 class="sec">'+esc(C[i][0])+' <small>– '+C[i][1]+' strings in '+es.length+' entries</small></h2>';
+subs.forEach((list,s)=>{const cards=list.filter(e=>e[3].length>1||head(e)&&false),singles=list.filter(e=>e[3].length===1);
+if(subs.size>1)h+='<h4>'+esc(s)+' ('+list.length+')</h4>';
+if(cards.length)h+='<div class="cols">'+cards.map(entryCard).join('')+'</div>';
+if(singles.length)h+='<div>'+singles.map(e=>singleRow(e[3][0])).join('')+'</div>'});
+if(es.length>n)h+='<button class="more" data-more="1">Show '+Math.min(LIM,es.length-n)+' more ('+(es.length-n)+' left)</button>';
+$('#catview').innerHTML=h}
+function showCat(i){cur=i;document.querySelectorAll('#cats a').forEach(a=>a.classList.toggle('on',+a.dataset.i===i));renderCat();}
+$('#catview').onclick=e=>{if(e.target.closest('.more')){lim[cur]=(lim[cur]||LIM)+LIM;renderCat();return}const r=e.target.closest('.rw');if(r&&!e.target.closest('a'))r.classList.toggle('open')};
+$('#cats').innerHTML=C.map((c,i)=>'<a href="#c-'+i+'" data-i="'+i+'">'+esc(c[0])+'<small>'+c[1]+'</small></a>').join('');
+function overview(){let h='';
+if(B.length){h+='<h2 class="sec">What this file announces</h2><div class="cols one">'+B.map(b=>'<div class="card"><h3>'+pretty(b[0])+'</h3>'+(b[1]?'<p>'+pretty(b[1])+'</p>':'')+'</div>').join('')+'</div>'}
+h+='<h2 class="sec">Topics</h2><div class="cols">'+C.map((c,i)=>{const es=BYCAT[i]||[];const ex=[];
+for(const e of es){const t=head(e);if(t){ex.push(pretty(val(t)).replace(/<[^>]+>/g,''));if(ex.length>=4)break}}
+return '<div class="card"><h3><a href="#c-'+i+'">'+esc(c[0])+'</a></h3><span class="stat">'+c[1]+' strings · '+es.length+' entries</span>'+(ex.length?'<p>'+ex.join(' · ')+'</p>':'')+'<a class="chip" href="#c-'+i+'">Open</a></div>'}).join('')+'</div>';
+$('#t-overview').insertAdjacentHTML('beforeend',h)}
+let rawLim=300;
+function raw(){const q=$('#q').value.trim().toLowerCase(),r=[];
+for(let i=0;i<D.length;i++){if(!q||(D[i][0]+' '+D[i][1]).toLowerCase().includes(q))r.push(i)}
+$('#rawn').textContent=r.length+' of '+D.length+' strings'+(q?' match “'+q+'”':'')+(r.length>rawLim?' (showing the first '+rawLim+')':'')+'. Click a string to expand it.';
+$('#rawl').innerHTML=r.slice(0,rawLim).map(i=>rawRow(i,true)).join('')+(r.length>rawLim?'<button class="more" data-more="1">Show 300 more</button>':'')}
+$('#rawl').onclick=e=>{if(e.target.closest('.more')){rawLim+=300;raw();return}if(e.target.closest('a'))return;const r=e.target.closest('.rw');if(r)r.classList.toggle('open')};
+$('#q').oninput=()=>{rawLim=300;raw();if(location.hash!=='#raw')location.hash='raw'};
+const TB=[['overview','Overview'],['browse','Browse by topic'],['raw','All strings']];
+$('#tabs').innerHTML=TB.map(t=>'<a href="#'+t[0]+'" data-t="'+t[0]+'">'+t[1]+'</a>').join('');
+function tab(t){TB.forEach(x=>$('#t-'+x[0]).hidden=x[0]!==t);document.querySelectorAll('#tabs a').forEach(a=>a.classList.toggle('on',a.dataset.t===t))}
+function route(){const h=location.hash.slice(1);
+if(h.startsWith('c-')&&C[+h.slice(2)]){tab('browse');showCat(+h.slice(2));window.scrollTo(0,0)}
+else if(h==='browse'){tab('browse');showCat(cur)}
+else if(TB.some(t=>t[0]===h))tab(h);else tab('overview')}
+overview();raw();addEventListener('hashchange',route);route();
+
+</script></body></html>

@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Demo wiki – Endless Space 2 localization</title>
+<style>
+:root{--bg:#c0c0c0;--fg:#000;--mut:#404040;--card:#fff;--bd:#808080;--acc:#000080;--tok:#ffffcc;color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font:13px/1.4 Tahoma,"MS Sans Serif",Verdana,Arial,sans-serif}
+h1,h2,h3,h4{font-family:Tahoma,"MS Sans Serif",Verdana,Arial,sans-serif;line-height:1.2;margin:0}
+header{padding:8px;max-width:1500px;margin:auto}
+h1{font-size:15px;background:#000080;color:#fff;padding:3px 6px;margin:0}
+.sub{color:var(--fg);margin:0 0 8px;max-width:none;background:var(--bg);border:2px solid;border-color:#fff #404040 #404040 #fff;border-top:0;padding:6px 8px}
+.bar{display:flex;flex-wrap:wrap;gap:8px;align-items:flex-end;padding-bottom:0}
+.tabs{display:flex;gap:2px;flex-wrap:wrap}
+.tabs a{padding:4px 12px;color:var(--fg);text-decoration:none;font-weight:normal;background:var(--bg);border:2px solid;border-color:#fff #404040 #404040 #fff}
+.tabs a.on{background:#000080;color:#fff;border-color:#404040 #fff #fff #404040}
+#q{margin-left:auto;min-width:220px;padding:3px 5px;border:2px solid;border-color:#404040 #fff #fff #404040;border-radius:0;background:#fff;color:#000;font:inherit}
+a:focus-visible,button:focus-visible,input:focus-visible,summary:focus-visible{outline:1px dotted #000;outline-offset:-4px}
+main{max-width:1500px;margin:auto;padding:8px 8px 40px}
+section[hidden]{display:none}
+.note{background:#ffffe1;border:1px solid #000;padding:6px 8px;color:#000;margin-bottom:10px;max-width:90ch}
+.legend{display:flex;flex-wrap:wrap;gap:4px 14px;margin:0 0 8px;font-size:12px;color:var(--fg)}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:0;background:var(--c);margin-right:5px;border:1px solid #000}
+.grid{display:grid;grid-template-columns:minmax(0,1fr) 440px;gap:10px;align-items:start}
+@media(max-width:1100px){.grid{grid-template-columns:1fr}}
+.mapwrap{overflow:auto;border:2px solid;border-color:#404040 #fff #fff #404040;border-radius:0;background:#fff}
+#map{position:relative}
+#map svg{position:absolute;inset:0}
+.ed{fill:none;stroke:#000;stroke-width:1;opacity:.6}
+.ed.w{stroke-dasharray:3 3}
+.ed.on{stroke:#000080;opacity:1;stroke-width:2}
+.nd{position:absolute;width:156px;height:62px;text-align:left;padding:5px 6px 5px 8px;border:2px solid;border-color:#fff #404040 #404040 #fff;border-left:6px solid var(--c);border-radius:0;background:var(--bg);color:var(--fg);font:inherit;cursor:pointer;overflow:hidden}
+.nd:active{border-color:#404040 #fff #fff #404040;border-left:6px solid var(--c)}
+.nd small{display:block;color:var(--mut);font-size:11px;line-height:1.2}
+.nd b{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;font-size:12px;line-height:1.25}
+.nd.dim{opacity:.4}
+.nd.sel{box-shadow:none;border-color:#404040 #fff #fff #404040;border-left:6px solid var(--c);background:#000080;color:#fff}
+.nd.sel small{color:#fff}
+#det{background:var(--bg);border:2px solid;border-color:#fff #404040 #404040 #fff;border-radius:0;padding:10px;position:sticky;top:10px;max-height:calc(100vh - 20px);overflow:auto}
+@media(max-width:1100px){#det{position:static;max-height:none}}
+.kick{color:#000080;font-weight:700;font-size:12px;margin-bottom:4px}
+#det h2{font-size:16px;margin-bottom:8px;background:#000080;color:#fff;padding:3px 6px}
+#det p{margin:0 0 8px;max-width:68ch}
+.ch{background:#fff;border:2px solid;border-color:#404040 #fff #fff #404040;border-left:6px solid var(--c);border-radius:0;padding:8px 10px;margin:10px 0}
+.ch h3{font-size:14px;margin-bottom:6px}
+.row{margin:5px 0;font-size:13px}
+.row span{display:inline-block;font-size:11px;font-weight:700;color:var(--mut);margin-right:6px;text-transform:uppercase}
+.row.bad span{color:#c00000}.row.ok span{color:#006000}
+.tok{font-style:normal;background:var(--tok);border:1px solid #808080;border-radius:0;padding:0 4px;font-weight:700}
+.kw{color:#000080}
+.lnk{list-style:square;padding:0 0 0 18px;margin:6px 0}
+.lnk li{margin:4px 0;font-size:13px}
+.lnk em{display:block;color:var(--mut);font-style:normal;font-size:12px}
+h4{margin:14px 0 4px;font-size:13px;border-bottom:1px solid #808080;padding-bottom:2px}
+a{color:#0000ee}
+a:visited{color:#551a8b}
+.cols{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:8px}
+.card{background:#fff;border:2px solid;border-color:#404040 #fff #fff #404040;border-radius:0;padding:8px 10px}
+.card h3{font-size:14px;margin-bottom:2px;color:#000080}
+.card .tag{color:var(--mut);font-size:12px;margin-bottom:6px;font-style:italic}
+.card p{margin:0 0 6px;font-size:13px}
+.eff{font-weight:700;color:#006000;font-size:13px}
+.chip{display:inline-block;margin:2px 4px 0 0;padding:1px 7px;background:var(--bg);border:2px solid;border-color:#fff #404040 #404040 #fff;border-radius:0;font-size:12px;text-decoration:none;color:#000}
+h2.sec{margin:18px 0 8px;font-size:14px;background:#000080;color:#fff;padding:3px 6px}
+.rw{background:#fff;border:2px solid;border-color:#404040 #fff #fff #404040;border-radius:0;padding:5px 8px;margin:5px 0;cursor:pointer}
+.rw code{font-family:"Courier New",monospace;font-size:12px;color:var(--mut);word-break:break-all}
+.rw div{margin-top:3px;font-size:13px;white-space:pre-line;max-height:2.9em;overflow:hidden}
+.rw.open div{max-height:none}
+
+.layout{display:grid;grid-template-columns:260px minmax(0,1fr);gap:10px;align-items:start}
+@media(max-width:800px){.layout{grid-template-columns:1fr}}
+#cats{background:#fff;border:2px solid;border-color:#404040 #fff #fff #404040;position:sticky;top:10px;max-height:calc(100vh - 20px);overflow:auto;padding:2px}
+@media(max-width:800px){#cats{position:static;max-height:200px}}
+#cats a{display:flex;justify-content:space-between;gap:6px;padding:2px 6px;color:#000;text-decoration:none}
+#cats a.on{background:#000080;color:#fff}
+#cats a small{opacity:.7;font-size:11px;align-self:center}
+.more{display:block;margin:10px 0;padding:4px 14px;font:inherit;color:#000;background:var(--bg);border:2px solid;border-color:#fff #404040 #404040 #fff;border-radius:0;cursor:pointer}
+.more:active{border-color:#404040 #fff #fff #404040}
+.card.big{grid-column:1/-1}
+.card .tag{font-family:"Courier New",monospace;font-style:normal;word-break:break-all}
+.card .row{white-space:pre-line}
+.empty{color:var(--mut);font-style:italic}
+h2.sec small{font-weight:normal;opacity:.85}
+.cols.one{grid-template-columns:repeat(auto-fill,minmax(340px,1fr))}
+.stat{display:block;color:var(--mut);font-size:12px;margin-bottom:6px}
+.back{display:inline-block;margin:0 0 6px}
+.rw a{font-size:12px;margin-left:6px}
+</style></head><body>
+<header>
+<a class="back" href="index.html">&laquo; All files</a>
+<h1>Demo wiki</h1>
+<p class="sub">Every string from <code>ES2_Localization_Demo_Locales.xml</code>: 70 strings in 36 entries, grouped by topic. Pick a topic on the Browse tab, or search every string.</p>
+<div class="bar"><nav class="tabs" id="tabs"></nav><input id="q" type="search" placeholder="Search every string…" aria-label="Search every string"></div>
+</header>
+<main>
+<section id="t-overview"><div class="note">The file holds text only, so entries are grouped by their key names: a key ending in Title, Description, Objective and so on is placed on the card of the entry it belongs to. Chips like <i class="tok">N<sub>1</sub></i> and <i class="tok">T</i> are numbers or names the game fills in, and <b class="kw">bold words</b> are in-game icons or keywords. Colour codes are stripped.</div></section>
+<section id="t-browse" hidden><div class="layout"><nav id="cats" aria-label="Topics"></nav><div id="catview"></div></div></section>
+<section id="t-raw" hidden><div class="note" id="rawn"></div><div id="rawl"></div></section>
+</main>
+<script>
+const D=[["Demo_Quest01-Title","Another World",0],["Demo_Quest01-Description","You left your Home Systems, times ago. You've just colonize a System in a far Constellation, and already it works well. You have to conquer a new world for the great Emperor Maximilien",0],["Demo_Quest01Choice1-Description","[TBD]",0],["Demo_Quest01Choice1-Objective","Colonize a new System in the same Constellation than System $SystemName.",0],["Demo_Quest01Choice1-TooltipDescription","TBD",0],["Demo_Quest01Choice1-Completed","Congratulation! You've colonize a new System. Amoung everything you've learnt, you discovered something that can improve your defense abilities.",0],["Demo_Navigation01Popup-Title","From Small Beginnings . . .",0],["Demo_Navigation01Popup-Description","To discover a System to Colonize, you have to explore the Galaxy. For doing this, your Empire possesses a fleet, made by 2 ships.\n#FFFF00#Click [leftClick] on this Fleet.#REVERT#\nIf you don't find it, don't forget to click on this compass bellow.",0],["Demo_Navigation02Popup-Title","Into The Great Beyond",0],["Demo_Navigation02Popup-Description","Okay, now it's time to strike out from your home System to discover a habitable planet to colonize! For now, galactic travel for Fleets is limited to #FFFFFF#Star Lanes#REVERT#.\nKeep in mind that Fleets cannot be modified or even re-directed while travelling; they must reach the destination System before they can be issued new commands.\n #FFFF00#Click-right [rightClick] on a lane #REVERT#which leaves the System $MyColonizedStarSystemName to move.",0],["Demo_Navigation03Popup-Title","Into The Great Beyond",0],["Demo_Navigation03Popup-Description","This lane seems long. You will take several turns to reach the other side. By patient, and let's see what you'll discover next turn. \nThen, #FFFF00#end your turn#REVERT# when you're ready.",0],["Demo_Navigation04Popup-Title","Moving a Fleet",0],["Demo_Navigation04Popup-Description","You fleet is still in a middle of a lane. You have to make it go further.\nSelect your fleet by #FFFF00#Clicking [leftClick] on the  Fleet.#REVERT#\n",0],["Demo_Navigation05Popup-Title","Moving a Fleet",0],["Demo_Navigation05Popup-Description","Did you see that fleet as #FFFFFF#[move] move points#REVERT# ?\nWhen a fleet moves, it spends its points.\nYou have to wait until the next turn to recover those points.",0],["Demo_Navigation06Popup-Description","Now, let's move this fleet to reach a System.\nYou can click on the lane or  #FFFF00#click [leftClick] on the auto move.#REVERT# Notice that this button will move every fleets of your Empire. If you click on the End Turn button, you fleet will also go further but it'll not be able to use its actions.",0],["Demo_Curiosity01Popup-Title","Mysteries Of The Cosmos",0],["Demo_Curiosity01Popup-Description","The galaxy holds many secrets: weird physics, strange lifeforms, relics of the Endless. \nFirst of all, select your fleet, then, #FFFF00#click [leftClick] on Send an Expedition Button#REVERT# or directly on the System if you prefer. ",0],["Demo_Curiosity03Popup-Title","Mysteries Of The Cosmos",0],["Demo_Curiosity03Popup-Description","Do you see those [curiosity] icons ? Those are the signals of Curiosities.\n#FFFF00#Click [leftClick] on a  [curiosity] Curiosity#REVERT# to start searching it.\n",0],["Demo_Curiosity04Popup-Title","Mysteries Of The Cosmos",0],["Demo_Curiosity04Popup-Description","Each time you search a Curiosity, you have some chance to find something interesting. Something, the signal was a fake, you'll find nothing or maybe some pirates, trying to trap you.\n\n",0],["Demo_Curiosity05Popup-Description","Notice that searching a [curiosity] Curiosity consumes a probe. Your fleet will take several to build a new one.\nTo see how many probes you've stocked, select your fleet and #FFFFFF#Over the Expedition Button#REVERT# \nThen, #FFFF00#end your turn#REVERT# when you're ready.",0],["Demo_Curiosity06Popup-Title","Continue to Explore",0],["Demo_Curiosity06Popup-Description","Let's continue!\nNow you know how to search curiosities and to navigate in this Galaxy, you can accomplish you initial mission: finding a Colonizable system.\nMove your fleet, pass the turns, and when you'll see the right System, I'll come again for assist you! \nDon't forget you can move out of a system #FFFF00#using the scroll wheel#REVERT#.",0],["Demo_Colonization01Popup-Title","Art of Colonization",0],["Demo_Colonization01Popup-Description","You found a perfect system.\nNow you're fleet is orbiting, select it to learn how to colonize.",0],["Demo_Colonization02Popup-Title","Art of Colonization",0],["Demo_Colonization02Popup-Description","You can colonized this System! By validating this colonization, your Settler ship will be disassembled after sending your population to the planet.\n#FFFF00#Click [leftClick] on the \"Colonize\" button or directly on the Star System.#REVERT#",0],["Demo_Colonization03Popup-Title","Art of Colonization",0],["Demo_Colonization03Popup-Description","Last move! You have to choose what kind of planet you prefer between all those colonizable planets. \n#FFFF00#Click [leftClick] on the \"Colonize\" button or directly on the Star System.#REVERT#",0],["Demo_Quest03-Title","Panic",0],["Demo_Quest03-Description","TBD",0],["Demo_Quest03Choice1-Description","TBD",0],["Demo_Quest03Choice1-Completed","TBD",0],["Demo_Quest03Choice1-Objective","Build the Improvement $DefenseBuildingName on the System $MyColonizedStarSystemName.",0],["Demo_Quest03Choice1-TooltipDescription","TBD",0],["Demo_Construction01Popup-Title","Building",0],["Demo_Construction01Popup-Description","Your population really needs to be protected.\nTo secure your system (or improve its economy), you have to build constructions on it. Even if it's not the only way to improve you system, it's efficient. Let's construct!\nFirst,#FFFF00# click [leftClick] on the System $MyColonizedStarSystemName.#REVERT#",0],["Demo_Construction02Popup-Title","Building",0],["Demo_Construction02Popup-Description","#FFFFFF#This list#REVERT# regroups all constructions your able to launch.\nClick on the #FFFF00# Building $DefenseBuildingName.#REVERT#",0],["Demo_Construction03Popup-Title","Building",0],["Demo_Construction03Popup-Description","If you over the #FFFFFF#Defense Building#REVERT#, you can see that this building will increase the #FFFFFF#Capacity of Defense for you System.#REVERT# Defense will help you to resist and defend your system during invasion.",0],["Demo_Construction04Popup-Description","Well, as you can see, this building needs [turn] turns to be built! In fact each turn, [industryColored]#df8269# Industry#REVERT# is send to build Star System Improvement.\nThen, #FFFF00#end your turn#REVERT# when you're ready.",0],["Demo_Event01-Title","Hunger Game",0],["Demo_Event01-Description","Leecher has ran away, your population is furious and ready to fight.\nThey decide to reinforce your army to defeat each Vodyani wich could come.\nThat's sound good, especially since your spies informed you about a possible invasion…",0],["Demo_Event01-Choice01Title","Accept",0],["Demo_Event01-Choice01Description","Spawn a Large Fleet",0],["Demo_Event01PoliticalEffectTitle","Increase [militaristColored] #b82738#Militarist#REVERT# Ideology in your Empire.\nSpawn a large Fleet on the System $MyColonizedStarSystemName.",0],["Demo_Hero01Popup-Title","Prepare for War",0],["Demo_Hero01Popup-Description","War is coming!\nYour people gives you a large fleet, but you can reimforce it!\nYou can assign heroes to your fleet. Here, you have to assign a Hero to marker fleet. \nThen, #FFFF00#click on the marked fleet#REVERT# when you're ready.\n",0],["Demo_Hero02Popup-Title","Prepare for War",0],["Demo_Hero02Popup-Description","As you can see, the slot dedicated to the Hero is empty. \nYou can assign $MyHeroName you won earlier!\n#FFFF00#Click [leftClick] on assign hero slot.#REVERT#",0],["Demo_Hero03Popup-Title","Prepare for War",0],["Demo_Hero03Popup-Description","Here, you can see you hero. $MyHeroName is available! In addition, his class seems perfect for battle. As Guardian, he will be efficient and able to buff your ships.\nLet's validate your choice.",0],["Demo_Hero04Popup-Title","Prepare for War",0],["Demo_Hero04Popup-Description","It seems you're ready. It's time for Battle. Next turn, Vodyani army will be here.\nThen, #FFFF00#end your turn#REVERT# when you're ready.",0],["Demo_Battle01Popup-Title","Battle Time!",0],["Demo_Battle01Popup-Description","Let's start fighting!\nThanks to this pannel you can organized your fleet. Because you're playing a Demo version, all the tactics and the options are not available, but notice the #FFFFFF#Advanced Screen.#REVERT#",0],["Demo_Battle02Popup-Description","* Here, you can see your three #FFFF00#Battle Tactics:#REVERT# what can of trajectories your fleets will take. \n* Click on the arrows to test their effect on the flotillas.\n",0],["Demo_Battle03Popup-Description","* Here you can see the #FFFFFF#estimation of you chance #REVERT#to win, comparing the enemy. \n* Notice this will not be perfectly accurate: a smart Tactic could change the battle results.\n* If you're ready, click on #FFFF00#Fight#REVERT# to see the Battle.",0],["Demo_QuestScreenPopup-Title","* See the Quest and the Event your Empire has met\n* Pin a Quest to watch it in all view",0],["Demo_QuestScreenPopup-Description","This screen sums up the narrative events which affect your Adventure. \nFor the demo, it is the only one which is unlocked. \nTo leave quickly a screen use #FFFF00# [rightClick] right click.#REVERT#",0],["Demo_Zoom01Popup-Title","Game Control",0],["Demo_Zoom01Popup-Description","[disclaimer] In order to ease your transition into the seat of imperial power, some of the usual starting conditions, including unique Faction Traits, have been temporarily disabled.\n",0],["Demo_Zoom02Popup-Description","The Endless galaxy is rich with opportunities, but also dangers. In order to survive this universe, you will need to build a mighty civilization that can conquer powerful foes. Before strating the Demo, we will try to get familiar with the Game controls.\n#FFFF00#Use the scroll wheel to zoom in or out#REVERT#, and appreciate all the layer of the Galaxy.",0],["Demo_Zoom03Popup-Description","To move arround, try to #FFFF00#click [leftClick] directly on the Galaxy and drag and drop#REVERT#. \nIf you ready #FFFF00#click [leftClick] on the End Turn Button#REVERT# and start the Demo.",0],["StarSystemImprovementDemo01Title","Defense Building",1],["StarSystemImprovementDemo01Description","Design to defend your citizens against enemies.",1]];
+const E=[[0,"Demo","Demo_Quest01",[["Title",0],["Description",1]]],[0,"Demo","Demo_Quest01Choice1",[["Description",2],["Objective",3],["TooltipDescription",4],["Completed",5]]],[0,"Demo","Demo_Navigation01Popup",[["Title",6],["Description",7]]],[0,"Demo","Demo_Navigation02Popup",[["Title",8],["Description",9]]],[0,"Demo","Demo_Navigation03Popup",[["Title",10],["Description",11]]],[0,"Demo","Demo_Navigation04Popup",[["Title",12],["Description",13]]],[0,"Demo","Demo_Navigation05Popup",[["Title",14],["Description",15]]],[0,"Demo","Demo_Navigation06Popup",[["Description",16]]],[0,"Demo","Demo_Curiosity01Popup",[["Title",17],["Description",18]]],[0,"Demo","Demo_Curiosity03Popup",[["Title",19],["Description",20]]],[0,"Demo","Demo_Curiosity04Popup",[["Title",21],["Description",22]]],[0,"Demo","Demo_Curiosity05Popup",[["Description",23]]],[0,"Demo","Demo_Curiosity06Popup",[["Title",24],["Description",25]]],[0,"Demo","Demo_Colonization01Popup",[["Title",26],["Description",27]]],[0,"Demo","Demo_Colonization02Popup",[["Title",28],["Description",29]]],[0,"Demo","Demo_Colonization03Popup",[["Title",30],["Description",31]]],[0,"Demo","Demo_Quest03",[["Title",32],["Description",33]]],[0,"Demo","Demo_Quest03Choice1",[["Description",34],["Completed",35],["Objective",36],["TooltipDescription",37]]],[0,"Demo","Demo_Construction01Popup",[["Title",38],["Description",39]]],[0,"Demo","Demo_Construction02Popup",[["Title",40],["Description",41]]],[0,"Demo","Demo_Construction03Popup",[["Title",42],["Description",43]]],[0,"Demo","Demo_Construction04Popup",[["Description",44]]],[0,"Demo","Demo_Event01",[["Title",45],["Description",46],["Choice01Title",47],["Choice01Description",48]]],[0,"Demo","Demo_Event01PoliticalEffect",[["Title",49]]],[0,"Demo","Demo_Hero01Popup",[["Title",50],["Description",51]]],[0,"Demo","Demo_Hero02Popup",[["Title",52],["Description",53]]],[0,"Demo","Demo_Hero03Popup",[["Title",54],["Description",55]]],[0,"Demo","Demo_Hero04Popup",[["Title",56],["Description",57]]],[0,"Demo","Demo_Battle01Popup",[["Title",58],["Description",59]]],[0,"Demo","Demo_Battle02Popup",[["Description",60]]],[0,"Demo","Demo_Battle03Popup",[["Description",61]]],[0,"Demo","Demo_QuestScreenPopup",[["Title",62],["Description",63]]],[0,"Demo","Demo_Zoom01Popup",[["Title",64],["Description",65]]],[0,"Demo","Demo_Zoom02Popup",[["Description",66]]],[0,"Demo","Demo_Zoom03Popup",[["Description",67]]],[1,"Star System","StarSystemImprovementDemo01",[["Title",68],["Description",69]]]];
+const C=[["Demo",68],["Star",2]];
+const B=[];
+
+const $=s=>document.querySelector(s);
+const esc=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+const cap=w=>{w=String(w).replace(/([a-z])([A-Z])/g,'$1 $2').replace(/([A-Za-z])(\d)/g,'$1 $2').replace(/(\d)([A-Za-z])/g,'$1 $2').replace(/[_-]+/g,' ').trim();return w?w[0].toUpperCase()+w.slice(1):w};
+function pretty(s){
+return esc(String(s||'').replace(/\\n/g,'\n'))
+.replace(/#[0-9a-fA-F]{6}#([\s\S]*?)#REVERT#/g,'$1').replace(/#[0-9a-fA-F]{6}#/g,'').replace(/#REVERT#/g,'')
+.replace(/\$Amount0?(\d+)Name/g,'<i class="tok">N<sub>$1</sub></i>').replace(/\$Timer/g,'<i class="tok">T</i>')
+.replace(/\$([A-Za-z]\w*)/g,(m,w)=>'<i class="tok">'+esc(cap(w.replace(/Name$/,'')||w))+'</i>')
+.replace(/\[turn\]/g,'turns')
+.replace(/\[(?:Strat\d+)?([\w-]+?)(?:Colored)?\]/g,(m,w)=>'<b class="kw">'+esc(cap(w))+'</b>')}
+const FLAB={Description:'Description',ShortTitle:'Short title',ShortDescription:'Short description',Tooltip:'Tooltip',TooltipTitle:'Tooltip title',TooltipDescription:'Tooltip',TooltipEffect:'Effect',TooltipEffectBis:'Effect (2)',Effect:'Effect',EffectOverride:'Effect override',Objective:'Objective',ObjectiveTooltip:'Hint',ObjectiveTitle:'Objective title',ObjectiveDescription:'Objective details',Outcome:'If completed',OutcomeFailed:'If failed',Failed:'If failed',Completed:'Completed',IntroTitle:'Intro title',IntroDescription:'Intro',RewardTitle:'Consequence',Text:'Text'};
+const FCLS={Outcome:'ok',Completed:'ok',OutcomeFailed:'bad',Failed:'bad'};
+const PREF=['IntroDescription','Description','ShortDescription','Objective','ObjectiveTitle','ObjectiveDescription','ObjectiveTooltip','Outcome','OutcomeFailed','Tooltip','TooltipDescription','TooltipEffect','TooltipEffectBis','Effect'];
+const BYCAT={};E.forEach(e=>(BYCAT[e[0]]=BYCAT[e[0]]||[]).push(e));
+const val=x=>D[x[1]][1];
+function head(e){const f=e[3];for(const k of ['Title','IntroTitle','ShortTitle']){const x=f.find(y=>y[0]===k&&val(y));if(x)return x}
+return f.find(y=>/Title$/.test(y[0])&&val(y))||null}
+function entryCard(e){const h=head(e),f=e[3].filter(x=>x!==h).map((x,i)=>[x,i]);
+f.sort((a,b)=>{const pa=PREF.indexOf(a[0][0]),pb=PREF.indexOf(b[0][0]);return (pa<0?100:pa)-(pb<0?100:pb)||a[1]-b[1]});
+let len=0,rows=f.map(([x])=>{const v=val(x);len+=v.length;const c=FCLS[x[0]]||'';
+return '<div class="row '+c+'"><span title="%'+esc(D[x[1]][0])+'">'+esc(FLAB[x[0]]||cap(x[0]))+'</span>'+(v.trim()?pretty(v):'<span class="empty">(empty)</span>')+'</div>'}).join('');
+return '<div class="card'+(f.length>8||len>1400?' big':'')+'"><h3>'+(h?pretty(val(h)):esc(cap(e[2])))+'</h3><div class="tag">%'+esc(e[2])+'</div>'+rows+'</div>'}
+const rawRow=(i,link)=>{const d=D[i];return '<div class="rw"><code>%'+esc(d[0])+'</code>'+(link&&C[d[2]]?' <a href="#c-'+d[2]+'">'+esc(C[d[2]][0])+'</a>':'')+'<div>'+esc(String(d[1]).replace(/\\n/g,'\n'))+'</div></div>'};
+const singleRow=x=>{const d=D[x[1]];return '<div class="rw"><code>%'+esc(d[0])+'</code><div>'+(d[1].trim()?pretty(d[1]):'<span class="empty">(empty)</span>')+'</div></div>'};
+let cur=0;const LIM=120,lim={};
+function renderCat(){const i=cur,es=BYCAT[i]||[],n=lim[i]||LIM,part=es.slice(0,n);
+const subs=new Map();part.forEach(e=>{if(!subs.has(e[1]))subs.set(e[1],[]);subs.get(e[1]).push(e)});
+let h='<h2 class="sec">'+esc(C[i][0])+' <small>– '+C[i][1]+' strings in '+es.length+' entries</small></h2>';
+subs.forEach((list,s)=>{const cards=list.filter(e=>e[3].length>1||head(e)&&false),singles=list.filter(e=>e[3].length===1);
+if(subs.size>1)h+='<h4>'+esc(s)+' ('+list.length+')</h4>';
+if(cards.length)h+='<div class="cols">'+cards.map(entryCard).join('')+'</div>';
+if(singles.length)h+='<div>'+singles.map(e=>singleRow(e[3][0])).join('')+'</div>'});
+if(es.length>n)h+='<button class="more" data-more="1">Show '+Math.min(LIM,es.length-n)+' more ('+(es.length-n)+' left)</button>';
+$('#catview').innerHTML=h}
+function showCat(i){cur=i;document.querySelectorAll('#cats a').forEach(a=>a.classList.toggle('on',+a.dataset.i===i));renderCat();}
+$('#catview').onclick=e=>{if(e.target.closest('.more')){lim[cur]=(lim[cur]||LIM)+LIM;renderCat();return}const r=e.target.closest('.rw');if(r&&!e.target.closest('a'))r.classList.toggle('open')};
+$('#cats').innerHTML=C.map((c,i)=>'<a href="#c-'+i+'" data-i="'+i+'">'+esc(c[0])+'<small>'+c[1]+'</small></a>').join('');
+function overview(){let h='';
+if(B.length){h+='<h2 class="sec">What this file announces</h2><div class="cols one">'+B.map(b=>'<div class="card"><h3>'+pretty(b[0])+'</h3>'+(b[1]?'<p>'+pretty(b[1])+'</p>':'')+'</div>').join('')+'</div>'}
+h+='<h2 class="sec">Topics</h2><div class="cols">'+C.map((c,i)=>{const es=BYCAT[i]||[];const ex=[];
+for(const e of es){const t=head(e);if(t){ex.push(pretty(val(t)).replace(/<[^>]+>/g,''));if(ex.length>=4)break}}
+return '<div class="card"><h3><a href="#c-'+i+'">'+esc(c[0])+'</a></h3><span class="stat">'+c[1]+' strings · '+es.length+' entries</span>'+(ex.length?'<p>'+ex.join(' · ')+'</p>':'')+'<a class="chip" href="#c-'+i+'">Open</a></div>'}).join('')+'</div>';
+$('#t-overview').insertAdjacentHTML('beforeend',h)}
+let rawLim=300;
+function raw(){const q=$('#q').value.trim().toLowerCase(),r=[];
+for(let i=0;i<D.length;i++){if(!q||(D[i][0]+' '+D[i][1]).toLowerCase().includes(q))r.push(i)}
+$('#rawn').textContent=r.length+' of '+D.length+' strings'+(q?' match “'+q+'”':'')+(r.length>rawLim?' (showing the first '+rawLim+')':'')+'. Click a string to expand it.';
+$('#rawl').innerHTML=r.slice(0,rawLim).map(i=>rawRow(i,true)).join('')+(r.length>rawLim?'<button class="more" data-more="1">Show 300 more</button>':'')}
+$('#rawl').onclick=e=>{if(e.target.closest('.more')){rawLim+=300;raw();return}if(e.target.closest('a'))return;const r=e.target.closest('.rw');if(r)r.classList.toggle('open')};
+$('#q').oninput=()=>{rawLim=300;raw();if(location.hash!=='#raw')location.hash='raw'};
+const TB=[['overview','Overview'],['browse','Browse by topic'],['raw','All strings']];
+$('#tabs').innerHTML=TB.map(t=>'<a href="#'+t[0]+'" data-t="'+t[0]+'">'+t[1]+'</a>').join('');
+function tab(t){TB.forEach(x=>$('#t-'+x[0]).hidden=x[0]!==t);document.querySelectorAll('#tabs a').forEach(a=>a.classList.toggle('on',a.dataset.t===t))}
+function route(){const h=location.hash.slice(1);
+if(h.startsWith('c-')&&C[+h.slice(2)]){tab('browse');showCat(+h.slice(2));window.scrollTo(0,0)}
+else if(h==='browse'){tab('browse');showCat(cur)}
+else if(TB.some(t=>t[0]===h))tab(h);else tab('overview')}
+overview();raw();addEventListener('hashchange',route);route();
+
+</script></body></html>
