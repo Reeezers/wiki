@@ -6,12 +6,12 @@ An interactive wiki and editing suite for the Endless Space 2 localization files
 
 ## 🔒 Security & Password Protection
 
-To ensure security, editing the wiki content and committing changes to the repository is password-protected.
+To ensure security, editing the wiki content, saving to local disk, and committing/pushing from the interface requires password verification.
 
 - **Password**: **`17ExTra`**
 - Anyone can read, browse, and search the wiki without a password.
-- **To edit, modify, add, delete, or save changes to the repository, you must key in the password `17ExTra`.**
-- Unauthorized save or commit attempts are rejected by the server with `HTTP 401 Unauthorized`.
+- **To edit, save locally, or trigger Git commit/push from the editor, you must key in the password `17ExTra`.**
+- Unauthorized API requests without `17ExTra` are rejected with `HTTP 401 Unauthorized`.
 
 ---
 
@@ -30,29 +30,43 @@ To ensure security, editing the wiki content and committing changes to the repos
 - Your browser will open **`http://localhost:8000/editor.html`** (or you can open it manually).
 
 ### 2. Enter the Password
-- When the editor opens, click **🔒 Locked (Key in Password to Edit)** or enter the password when prompted:
+- When the editor opens, enter the password when prompted:
   ```
   17ExTra
   ```
 - Click **🔓 Unlock Editor**. The status changes to **🔓 Editor Authenticated (17ExTra)**, unlocking all editing tools.
 
-### 3. Edit Strings with Live Preview
+### 3. Edit Strings & Save to Local
 - **Select any of the 16 files**: Choose from 2025 Patch, Base Game, Assets, Quests, DLCs, Updates, etc.
-- **Search & Filter**: Filter by Topic / Category or search for specific keys and text.
 - **Visual Editing**:
-  - Click on any string to inspect and edit its key, category, or English text.
+  - Click on any string to inspect and edit its key, category, or localization text.
   - **Live ES2 Game Preview**: Renders tokens (`$Amount01Name`, `$Timer`), game keywords (`[dust]`, `[science]`, `[industry]`, `[food]`, `[manpower]`, `[turn]`), and color codes (`#color#...#REVERT#`) in real time.
-  - **Token Toolbar**: Click token buttons to insert common Endless Space 2 variables and icons directly at cursor.
+  - **Token Toolbar**: Click token buttons to insert common Endless Space 2 variables and icons directly at the cursor.
+- **Save to Local**:
+  - Click **💾 Save to Local** on an individual string or **💾 Save (Local)** in the toolbar.
+  - Changes are saved **directly to the local JavaScript files (`js/*.js`) on disk**.
 
-### 4. Immediate Save to the Repository
-- Click **💾 Save & Commit to Repository** on any individual string or **💾 Save to Repository** in the top bar.
-- Changes are **immediately saved to the JavaScript localization file (`js/*.js`)** on disk and a **Git commit is immediately created in the repository** with a descriptive commit message and timestamp.
-- The commit hash and confirmation toast appear instantly in the editor.
+---
 
-### 5. Add, Delete & Batch Replace
-- **➕ Add String**: Create a new localization string and commit it to the repository.
-- **🗑️ Delete String**: Remove unused strings with confirmation and commit to the repository.
-- **🔍 Find & Replace**: Perform batch replacements across the whole file or filtered topic.
+## 📦 Committing & Pushing
+
+Committing and pushing can be done in either of two ways:
+
+### Option A: From the Editor Itself
+- **📦 Git Commit Button**:
+  - Click **📦 Git Commit** in the top bar.
+  - Inspect the list of modified files, enter your commit message (or use the suggested default), and click **Commit to Git**.
+- **🚀 Git Push Button**:
+  - Click **🚀 Git Push** to push your commits directly to the remote repository (`origin/main`).
+
+### Option B: Like Usual via Git CLI / Terminal
+Because edits are saved directly to the local files, you can manage Git as usual using standard commands or your favorite Git GUI / VS Code:
+```bash
+git status
+git add .
+git commit -m "Update localization strings"
+git push
+```
 
 ---
 
@@ -68,8 +82,8 @@ To ensure security, editing the wiki content and committing changes to the repos
 
 ```
 ├── editor.html                               # Visual Content Editor web interface
-├── server.py                                 # Python server with Git auto-commit engine
-├── server.js                                 # Node.js server with Git auto-commit engine
+├── server.py                                 # Python server (Local save + Git commit/push API)
+├── server.js                                 # Node.js server (Local save + Git commit/push API)
 ├── run_editor.bat                            # Windows 1-click launcher
 │
 ├── js/                                       # JavaScript localization files (wiki content)

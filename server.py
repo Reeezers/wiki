@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 Endless Space 2 Localization Wiki - Content Editor & Development Server
-Includes password-protected REST API with immediate Git repository commits.
+Saves to local disk only. Provides optional Git commit and push endpoints from editor.
 Required Password: 17ExTra
 """
 
@@ -206,13 +206,33 @@ def get_git_info():
     except Exception:
         branch = "unknown"
 
+    uncommitted = []
     try:
         status_out = subprocess.check_output(
             ["git", "status", "--porcelain"], cwd=ROOT_DIR, stderr=subprocess.DEVNULL
         ).decode("utf-8").strip()
-        is_clean = len(status_out) == 0
+        if status_out:
+            for line in status_out.split("\n"):
+                if line.strip():
+                    uncommitted.append(line.strip())
+        is_clean = len(uncommitted) == 0
     except Exception:
         is_clean = False
+
+    ahead = 0
+    behind = 0
+    try:
+        sb = subprocess.check_output(
+            ["git", "status", "-sb"], cwd=ROOT_DIR, stderr=subprocess.DEVNULL
+        ).decode("utf-8").strip()
+        m_ahead = re.search(r"\[ahead\s+(\d+)\]", sb)
+        if m_ahead:
+            ahead = int(m_ahead.group(1))
+        m_behind = re.search(r"behind\s+(\d+)", sb)
+        if m_behind:
+            behind = int(m_behind.group(1))
+    except Exception:
+        pass
 
     recent = []
     try:
@@ -236,6 +256,10 @@ def get_git_info():
     return {
         "branch": branch,
         "clean": is_clean,
+        "uncommitted": uncommitted,
+        "uncommittedCount": len(uncommitted),
+        "ahead": ahead,
+        "behind": behind,
         "latest": latest,
         "recent": recent
     }
@@ -354,7 +378,7 @@ class WikiEditorHandler(SimpleHTTPRequestHandler):
                 self.end_headers()
                 self.wfile.write(json.dumps({
                     "success": False,
-                    "error": "Unauthorized: Invalid password. To edit and save changes to the repository, you must key in 17ExTra."
+                    "error": "Unauthorized: Invalid password. To edit and save changes, you must key in 17ExTra."
                 }).encode("utf-8"))
                 return
 
@@ -393,38 +417,7 @@ class WikiEditorHandler(SimpleHTTPRequestHandler):
                 with open(filepath, "w", encoding="utf-8") as f:
                     f.write(new_js)
 
-                # Commit immediately to git repository
-                commit_msg = payload.get("commitMessage")
-                if not commit_msg:
-                    key_hint = payload.get("keyHint")
-                    if key_hint:
-                        commit_msg = f"Update '{key_hint}' in {filename} via Wiki Editor"
-                    else:
-                        commit_msg = f"Update {filename} content ({len(updated_strings)} strings) via Wiki Editor"
-
-                rel_js_path = os.path.relpath(filepath, ROOT_DIR)
-                subprocess.run(["git", "add", rel_js_path], cwd=ROOT_DIR, check=True)
-
-                # Check if there are staged changes to commit
-                staged = subprocess.check_output(
-                    ["git", "diff", "--name-only", "--cached"], cwd=ROOT_DIR
-                ).decode("utf-8").strip()
-
-                commit_hash = "unchanged"
-                if staged:
-                    subprocess.run(["git", "commit", "-m", commit_msg], cwd=ROOT_DIR, check=True)
-                    commit_hash = subprocess.check_output(
-                        ["git", "rev-parse", "--short", "HEAD"], cwd=ROOT_DIR
-                    ).decode("utf-8").strip()
-
-                # Attempt push if remote is configured, non-blocking with 3s timeout
-                pushed = False
-                try:
-                    subprocess.run(["git", "push"], cwd=ROOT_DIR, timeout=3, capture_output=True)
-                    pushed = True
-                except Exception:
-                    pushed = False
-
+                # Local Save Only: writes to local disk! Does not commit or push.
                 git_info = get_git_info()
 
                 self.send_response(200)
@@ -433,13 +426,132 @@ class WikiEditorHandler(SimpleHTTPRequestHandler):
                 self.wfile.write(json.dumps({
                     "success": True,
                     "filename": filename,
-                    "commit": commit_hash,
-                    "message": f"Successfully saved and committed to repository ({commit_hash})",
+                    "message": f"Successfully saved {filename} to local disk.",
                     "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-                    "pushed": pushed,
                     "git": git_info
                 }, ensure_ascii=False).encode("utf-8"))
 
+            except Exception as e:
+                self.send_response(500)
+                self.send_header("Content-Type", "application/json; charset=utf-8")
+                self.end_headers()
+                self.wfile.write(json.dumps({"success": False, "error": str(e)}).encode("utf-8"))
+            return
+
+        elif path == "/api/git/commit":
+            # Explicit Git Commit from editor
+            password = payload.get("password", "") or self.headers.get("X-Editor-Password", "")
+            if password != PASSWORD:
+                self.send_response(401)
+                self.send_header("Content-Type", "application/json")
+                self.end_headers()
+                self.wfile.write(json.dumps({
+                    "success": False,
+                    "error": "Unauthorized: Invalid password. Key in 17ExTra to commit."
+                }).encode("utf-8"))
+                return
+
+            commit_msg = payload.get("message", "").strip() or "Update wiki localization content"
+            files_to_add = payload.get("files", [])
+
+            try:
+                if files_to_add and isinstance(files_to_add, list):
+                    for f in files_to_add:
+                        subprocess.run(["git", "add", f], cwd=ROOT_DIR, check=True)
+                else:
+                    subprocess.run(["git", "add", "."], cwd=ROOT_DIR, check=True)
+
+                staged = subprocess.check_output(
+                    ["git", "diff", "--name-only", "--cached"], cwd=ROOT_DIR
+                ).decode("utf-8").strip()
+
+                if not staged:
+                    self.send_response(200)
+                    self.send_header("Content-Type", "application/json; charset=utf-8")
+                    self.end_headers()
+                    self.wfile.write(json.dumps({
+                        "success": False,
+                        "error": "No staged changes to commit.",
+                        "git": get_git_info()
+                    }).encode("utf-8"))
+                    return
+
+                subprocess.run(["git", "commit", "-m", commit_msg], cwd=ROOT_DIR, check=True)
+                commit_hash = subprocess.check_output(
+                    ["git", "rev-parse", "--short", "HEAD"], cwd=ROOT_DIR
+                ).decode("utf-8").strip()
+
+                git_info = get_git_info()
+                self.send_response(200)
+                self.send_header("Content-Type", "application/json; charset=utf-8")
+                self.end_headers()
+                self.wfile.write(json.dumps({
+                    "success": True,
+                    "commit": commit_hash,
+                    "message": f"Committed to Git ({commit_hash})",
+                    "git": git_info
+                }).encode("utf-8"))
+
+            except Exception as e:
+                self.send_response(500)
+                self.send_header("Content-Type", "application/json; charset=utf-8")
+                self.end_headers()
+                self.wfile.write(json.dumps({"success": False, "error": str(e)}).encode("utf-8"))
+            return
+
+        elif path == "/api/git/push":
+            # Explicit Git Push from editor
+            password = payload.get("password", "") or self.headers.get("X-Editor-Password", "")
+            if password != PASSWORD:
+                self.send_response(401)
+                self.send_header("Content-Type", "application/json")
+                self.end_headers()
+                self.wfile.write(json.dumps({
+                    "success": False,
+                    "error": "Unauthorized: Invalid password. Key in 17ExTra to push."
+                }).encode("utf-8"))
+                return
+
+            try:
+                res = subprocess.run(
+                    ["git", "push"],
+                    cwd=ROOT_DIR,
+                    timeout=20,
+                    capture_output=True,
+                    text=True
+                )
+                git_info = get_git_info()
+
+                if res.returncode == 0:
+                    self.send_response(200)
+                    self.send_header("Content-Type", "application/json; charset=utf-8")
+                    self.end_headers()
+                    self.wfile.write(json.dumps({
+                        "success": True,
+                        "message": "Pushed to remote repository successfully!",
+                        "output": res.stdout,
+                        "git": git_info
+                    }).encode("utf-8"))
+                else:
+                    self.send_response(400)
+                    self.send_header("Content-Type", "application/json; charset=utf-8")
+                    self.end_headers()
+                    err_msg = res.stderr or res.stdout or "Push failed"
+                    self.wfile.write(json.dumps({
+                        "success": False,
+                        "error": err_msg.strip(),
+                        "git": git_info
+                    }).encode("utf-8"))
+
+            except subprocess.TimeoutExpired:
+                self.send_response(408)
+                self.send_header("Content-Type", "application/json; charset=utf-8")
+                self.end_headers()
+                self.wfile.write(json.dumps({
+                    "success": False,
+                    "error": "Git push timed out (remote server took too long or requires interactive credentials).",
+                    "git": get_git_info()
+                }).encode("utf-8"))
             except Exception as e:
                 self.send_response(500)
                 self.send_header("Content-Type", "application/json; charset=utf-8")

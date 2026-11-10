@@ -1,13 +1,14 @@
 #!/usr/bin/env node
 /**
  * Endless Space 2 Localization Wiki - Node.js Content Editor Server
+ * Saves to local disk only. Provides optional Git commit and push endpoints.
  * Password: 17ExTra
  */
 
 const http = require('http');
 const fs = require('fs');
 const path = require('path');
-const { execSync } = require('child_process');
+const { execSync, spawn } = require('child_process');
 
 const PORT = process.env.PORT || 8000;
 const ROOT_DIR = __dirname;
@@ -162,6 +163,9 @@ function rebuildJsContent(origContent, updatedStrings) {
 function getGitInfo() {
   let branch = 'unknown';
   let isClean = false;
+  let uncommitted = [];
+  let ahead = 0;
+  let behind = 0;
   const recent = [];
 
   try {
@@ -170,7 +174,18 @@ function getGitInfo() {
 
   try {
     const status = execSync('git status --porcelain', { cwd: ROOT_DIR }).toString().trim();
-    isClean = status.length === 0;
+    if (status) {
+      uncommitted = status.split('\n').map(s => s.trim()).filter(Boolean);
+    }
+    isClean = uncommitted.length === 0;
+  } catch (e) {}
+
+  try {
+    const sb = execSync('git status -sb', { cwd: ROOT_DIR }).toString().trim();
+    const mAhead = sb.match(/\[ahead\s+(\d+)\]/);
+    if (mAhead) ahead = parseInt(mAhead[1], 10);
+    const mBehind = sb.match(/behind\s+(\d+)/);
+    if (mBehind) behind = parseInt(mBehind[1], 10);
   } catch (e) {}
 
   try {
@@ -182,7 +197,16 @@ function getGitInfo() {
     }
   } catch (e) {}
 
-  return { branch, clean: isClean, latest: recent[0] || null, recent };
+  return {
+    branch,
+    clean: isClean,
+    uncommitted,
+    uncommittedCount: uncommitted.length,
+    ahead,
+    behind,
+    latest: recent[0] || null,
+    recent
+  };
 }
 
 const MIME_TYPES = {
@@ -303,12 +327,13 @@ const server = http.createServer((req, res) => {
       }
 
       if (pathname === '/api/save') {
+        // Save to local disk only
         const pwd = payload.password || req.headers['x-editor-password'];
         if (pwd !== PASSWORD) {
           res.writeHead(401, { 'Content-Type': 'application/json' });
           res.end(JSON.stringify({
             success: false,
-            error: 'Unauthorized: Invalid password. To edit and save changes to the repository, you must key in 17ExTra.'
+            error: 'Unauthorized: Invalid password. To edit and save changes, you must key in 17ExTra.'
           }));
           return;
         }
@@ -328,31 +353,86 @@ const server = http.createServer((req, res) => {
           const newJs = rebuildJsContent(orig, payload.strings || []);
           fs.writeFileSync(targetPath, newJs, 'utf8');
 
-          const relPath = path.relative(ROOT_DIR, targetPath);
-          execSync(`git add "${relPath}"`, { cwd: ROOT_DIR });
-
-          const commitMsg = payload.commitMessage ||
-            (payload.keyHint ? `Update '${payload.keyHint}' in ${filename} via Wiki Editor` : `Update ${filename} via Wiki Editor`);
-
-          let commitHash = 'unchanged';
-          const staged = execSync('git diff --name-only --cached', { cwd: ROOT_DIR }).toString().trim();
-          if (staged) {
-            execSync(`git commit -m "${commitMsg.replace(/"/g, '\\"')}"`, { cwd: ROOT_DIR });
-            commitHash = execSync('git rev-parse --short HEAD', { cwd: ROOT_DIR }).toString().trim();
-          }
-
           res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
           res.end(JSON.stringify({
             success: true,
             filename,
-            commit: commitHash,
-            message: `Successfully saved and committed to repository (${commitHash})`,
+            message: `Successfully saved ${filename} to local disk.`,
             timestamp: new Date().toISOString(),
             git: getGitInfo()
           }));
         } catch (err) {
           res.writeHead(500, { 'Content-Type': 'application/json' });
           res.end(JSON.stringify({ success: false, error: err.message }));
+        }
+        return;
+      }
+
+      if (pathname === '/api/git/commit') {
+        // Explicit Git Commit from editor
+        const pwd = payload.password || req.headers['x-editor-password'];
+        if (pwd !== PASSWORD) {
+          res.writeHead(401, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({
+            success: false,
+            error: 'Unauthorized: Invalid password. Key in 17ExTra to commit.'
+          }));
+          return;
+        }
+
+        const commitMsg = (payload.message || '').trim() || 'Update wiki localization content';
+        try {
+          execSync('git add .', { cwd: ROOT_DIR });
+          const staged = execSync('git diff --name-only --cached', { cwd: ROOT_DIR }).toString().trim();
+          if (!staged) {
+            res.writeHead(200, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ success: false, error: 'No staged changes to commit.', git: getGitInfo() }));
+            return;
+          }
+          execSync(`git commit -m "${commitMsg.replace(/"/g, '\\"')}"`, { cwd: ROOT_DIR });
+          const commitHash = execSync('git rev-parse --short HEAD', { cwd: ROOT_DIR }).toString().trim();
+          res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
+          res.end(JSON.stringify({
+            success: true,
+            commit: commitHash,
+            message: `Committed to Git (${commitHash})`,
+            git: getGitInfo()
+          }));
+        } catch (err) {
+          res.writeHead(500, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({ success: false, error: err.message }));
+        }
+        return;
+      }
+
+      if (pathname === '/api/git/push') {
+        // Explicit Git Push from editor
+        const pwd = payload.password || req.headers['x-editor-password'];
+        if (pwd !== PASSWORD) {
+          res.writeHead(401, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({
+            success: false,
+            error: 'Unauthorized: Invalid password. Key in 17ExTra to push.'
+          }));
+          return;
+        }
+
+        try {
+          const out = execSync('git push', { cwd: ROOT_DIR, timeout: 20000 }).toString();
+          res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
+          res.end(JSON.stringify({
+            success: true,
+            message: 'Pushed to remote repository successfully!',
+            output: out,
+            git: getGitInfo()
+          }));
+        } catch (err) {
+          res.writeHead(400, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({
+            success: false,
+            error: err.stderr ? err.stderr.toString().trim() : err.message,
+            git: getGitInfo()
+          }));
         }
         return;
       }
