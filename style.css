@@ -483,19 +483,5 @@ h2.sec small {
     font-size:12px;
     margin-left:6px;
 }
-.tab-edit {
-    background:#000080 !important;
-    color:#fff !important;
-    border-color:#404040 #fff #fff #404040 !important;
-    font-weight:bold !important;
-}
-.tab-edit:hover {
-    background:#1010a0 !important;
-}
-.edit-link {
-    display:inline-block;
-    padding:0 3px;
-    text-decoration:none;
-    font-size:11px;
-}
+
 

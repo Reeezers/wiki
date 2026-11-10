@@ -443,7 +443,7 @@ const server = http.createServer((req, res) => {
   }
 });
 
-server.listen(PORT, () => {
+server.listen(PORT, '127.0.0.1', () => {
   console.log(`Endless Space 2 Localization Wiki - Editor Server running on port ${PORT}`);
   console.log(`Editor URL: http://localhost:${PORT}/editor.html`);
   console.log(`Password: ${PASSWORD}`);

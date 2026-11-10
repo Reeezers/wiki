@@ -70,11 +70,11 @@ git push
 
 ---
 
-## ✏️ Quick "Edit Wiki" Links from Wiki Pages
+## 🔒 Developer-Only Editor Isolation
 
-- Every wiki page (`ES2_Localization_*_Locales.html`) includes an **`✏️ Edit Wiki`** button in the top navigation tab bar.
-- Clicking **`✏️ Edit Wiki`** opens `editor.html` directly with that file loaded.
-- The portal home page (`index.html`) includes a direct link to the **`✏️ Content Editor (Password Protected)`**.
+- **Disconnected from Public Wiki**: The public-facing wiki (`index.html` and the 16 `ES2_Localization_*_Locales.html` pages) contains **no links, buttons, or navigation to `editor.html`**. Public visitors can only browse and search the wiki.
+- **Local Developer Access Only**: Only the developer who has the repository installed locally can open the editor by running `run_editor.bat` (or starting `server.py` / `server.js`) and navigating to `http://localhost:8000/editor.html`.
+- **Password Required**: Even when accessing the editor interface locally, authentication with password **`17ExTra`** is required before any editing, local saving, committing, or pushing can occur.
 
 ---
 

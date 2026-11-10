@@ -12,7 +12,7 @@ import re
 import urllib.parse
 import subprocess
 from datetime import datetime
-from http.server import HTTPServer, SimpleHTTPRequestHandler
+from http.server import ThreadingHTTPServer, SimpleHTTPRequestHandler
 import webbrowser
 
 ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -562,8 +562,8 @@ class WikiEditorHandler(SimpleHTTPRequestHandler):
         self.send_error(404, "Endpoint not found")
 
 def run(port=PORT, open_browser=True):
-    server_address = ("", port)
-    httpd = HTTPServer(server_address, WikiEditorHandler)
+    server_address = ("127.0.0.1", port)
+    httpd = ThreadingHTTPServer(server_address, WikiEditorHandler)
     url = f"http://localhost:{port}/editor.html"
     print("=" * 60)
     print("  Endless Space 2 Localization Wiki - Editor Server")
