@@ -4,7 +4,7 @@ An interactive wiki and editing suite for the Endless Space 2 localization files
 
 ---
 
-## 🔒 Security & Password Protection
+## Security & Password Protection
 
 To ensure security, editing the wiki content, saving to local disk, and committing/pushing from the interface requires password verification.
 
@@ -15,7 +15,7 @@ To ensure security, editing the wiki content, saving to local disk, and committi
 
 ---
 
-## 🚀 How to Edit Wiki Content
+## How to Edit Wiki Content
 
 ### 1. Launch the Editor Server
 - **Windows**: Double-click **`run_editor.bat`**
@@ -34,7 +34,7 @@ To ensure security, editing the wiki content, saving to local disk, and committi
   ```
   17ExTra
   ```
-- Click **🔓 Unlock Editor**. The status changes to **🔓 Editor Authenticated (17ExTra)**, unlocking all editing tools.
+- Click **Unlock Editor**. The status changes to ** Editor Authenticated (17ExTra)**, unlocking all editing tools.
 
 ### 3. Edit Strings & Save to Local
 - **Select any of the 16 files**: Choose from 2025 Patch, Base Game, Assets, Quests, DLCs, Updates, etc.
@@ -48,16 +48,16 @@ To ensure security, editing the wiki content, saving to local disk, and committi
 
 ---
 
-## 📦 Committing & Pushing
+## Committing & Pushing
 
 Committing and pushing can be done in either of two ways:
 
 ### Option A: From the Editor Itself
-- **📦 Git Commit Button**:
-  - Click **📦 Git Commit** in the top bar.
+- **Git Commit Button**:
+  - Click **Git Commit** in the top bar.
   - Inspect the list of modified files, enter your commit message (or use the suggested default), and click **Commit to Git**.
-- **🚀 Git Push Button**:
-  - Click **🚀 Git Push** to push your commits directly to the remote repository (`origin/main`).
+- **Git Push Button**:
+  - Click **Git Push** to push your commits directly to the remote repository (`origin/main`).
 
 ### Option B: Like Usual via Git CLI / Terminal
 Because edits are saved directly to the local files, you can manage Git as usual using standard commands or your favorite Git GUI / VS Code:
@@ -70,7 +70,7 @@ git push
 
 ---
 
-## 🔒 Developer-Only Editor Isolation
+## Developer-Only Editor Isolation
 
 - **Disconnected from Public Wiki**: The public-facing wiki (`index.html` and the 16 `ES2_Localization_*_Locales.html` pages) contains **no links, buttons, or navigation to `editor.html`**. Public visitors can only browse and search the wiki.
 - **Local Developer Access Only**: Only the developer who has the repository installed locally can open the editor by running `run_editor.bat` (or starting `server.py` / `server.js`) and navigating to `http://localhost:8000/editor.html`.
@@ -78,7 +78,7 @@ git push
 
 ---
 
-## 📁 Repository Structure
+## Repository Structure
 
 ```
 ├── editor.html                               # Visual Content Editor web interface
