@@ -53,11 +53,327 @@ $('#rawn').textContent=r.length+' of '+D.length+' strings'+(q?' match “'+q+'�
 $('#rawl').innerHTML=r.slice(0,rawLim).map(i=>rawRow(i,true)).join('')+(r.length>rawLim?'<button class="more" data-more="1">Show 300 more</button>':'')}
 $('#rawl').onclick=e=>{if(e.target.closest('.more')){rawLim+=300;raw();return}if(e.target.closest('a'))return;const r=e.target.closest('.rw');if(r)r.classList.toggle('open')};
 $('#q').oninput=()=>{rawLim=300;raw();if(location.hash!=='#raw')location.hash='raw'};
-const TB=[['overview','Overview'],['browse','Browse by topic'],['raw','All strings']];
+/* ===== Quest map (same layout as the DLC 2 wiki) ===== */
+const DK=Object.fromEntries(D.map(d=>[d[0],d[1]]));
+const para=s=>String(s||'').replace(/\\n/g,'\n').split('\n').filter(x=>x.trim()&&!/^\s*-{3,}\s*$/.test(x)||0).map(x=>'<p>'+pretty(x)+'</p>').join('');
+const gk=k=>DK[k];
+
+const FACTIONS=[
+{id:'sophons',name:'Sophons',desc:'Curious and erratic scientists building ENFER',W:{sh:['Shared track','#6b7a99'],sc:['Science track','#12a594'],mi:['Military track','#b82738'],di:['Diplomacy track','#8b5cf6']},
+N:[
+{id:'so_1',lab:'Chapter 1: Good Idea',x:0,y:1.4,who:'sh',pre:'SophonsQuest-Chapter1'},
+{id:'so_2_sc',lab:'Chapter 2: Science',x:1,y:0,who:'sc',pre:'SophonsQuest-Chapter2.1-Science'},
+{id:'so_2_mi',lab:'Chapter 2: Military',x:1,y:1.4,who:'mi',pre:'SophonsQuest-Chapter2.1-Military'},
+{id:'so_2_di',lab:'Chapter 2: Diplomacy',x:1,y:2.8,who:'di',pre:'SophonsQuest-Chapter2.1-Diplomacy'},
+{id:'so_3_sc',lab:'Chapter 3: Transcendence',x:2,y:0,who:'sc',pre:'SophonsQuest-Chapter3-Science'},
+{id:'so_3_mi',lab:'Chapter 3: The Mavros',x:2,y:1.4,who:'mi',pre:'SophonsQuest-Chapter3-Military'},
+{id:'so_3_di',lab:'Chapter 3: High Castle',x:2,y:2.8,who:'di',pre:'SophonsQuest-Chapter3-Diplomacy'},
+{id:'so_4_sc',lab:'Final: On Sophonity',x:3,y:0,who:'sc',pre:'SophonsQuest-Chapter4-Science'},
+{id:'so_4_mi',lab:'Final: Into the ENFERno',x:3,y:1.4,who:'mi',pre:'SophonsQuest-Chapter4-Military'},
+{id:'so_4_di',lab:'Final: ENFER’s Game',x:3,y:2.8,who:'di',pre:'SophonsQuest-Chapter4-Diplomacy'}
+],
+ED:[
+['so_1','so_2_sc','Developing ENFER for pure scientific breakthroughs.',1],
+['so_1','so_2_mi','Developing ENFER with defensive militarization.',1],
+['so_1','so_2_di','Developing ENFER to analyze diplomatic solutions.',1],
+['so_2_sc','so_3_sc','Scientific studies lead to transcending biology.'],
+['so_2_mi','so_3_mi','Military scouting leads to direct contact with the volatile Mavros.'],
+['so_2_di','so_3_di','Diplomatic AI calculations lead to ENFER taking political authority.'],
+['so_3_sc','so_4_sc','Final philosophical resolution on the meaning of Sophon life.'],
+['so_3_mi','so_4_mi','Final confrontation against rogue military subroutines in ENFER.'],
+['so_3_di','so_4_di','Playing ENFER\x27s game to negotiate galactic peace.']
+]},
+
+{id:'cravers',name:'Cravers',desc:'The synthetic cybernetic locusts of the Endless',W:{sh:['Hive track','#6b7a99'],in:['Industry track','#d19a12'],re:['Religious track','#b82738']},
+N:[
+{id:'cr_1',lab:'Chapter 1, Part 1',x:0,y:1.2,who:'sh',pre:'CraversQuest-Chapter1'},
+{id:'cr_1_1',lab:'Chapter 1, Part 2',x:1,y:1.2,who:'sh',pre:'CraversQuest-Chapter1.1'},
+{id:'cr_2_in',lab:'Chapter 2: Industry',x:2,y:0.4,who:'in',pre:'CraversQuest-Chapter2-Industry'},
+{id:'cr_2_re',lab:'Chapter 2: Religious',x:2,y:2.0,who:'re',pre:'CraversQuest-Chapter2-Religious'},
+{id:'cr_3_in',lab:'Chapter 3: Crack Shell',x:3,y:0.4,who:'in',pre:'CraversQuest-Chapter3-Industry'},
+{id:'cr_3_re',lab:'Chapter 3: Threshold',x:3,y:2.0,who:'re',pre:'CraversQuest-Chapter3-Religious'},
+{id:'cr_4_in',lab:'Final: Crack the Nuts',x:4,y:0.4,who:'in',pre:'CraversQuest-Chapter4-Industry'},
+{id:'cr_4_re',lab:'Final: Ascension',x:4,y:2.0,who:'re',pre:'CraversQuest-Chapter4-Religious'}
+],
+ED:[
+['cr_1','cr_1_1','Ensuring hive sustenance and brood loyalty.'],
+['cr_1_1','cr_2_in','Strip mining and harvesting world resources.',1],
+['cr_1_1','cr_2_re','Uncovering whispers of the ancient Endless creators.',1],
+['cr_2_in','cr_3_in','Direct industrial assault on planetary defenses.'],
+['cr_2_re','cr_3_re','Crossing the sacred threshold of Endless ruins.'],
+['cr_3_in','cr_4_in','The final feast: totally subjugating the galaxy for the Hive.'],
+['cr_3_re','cr_4_re','Ascending to become the divine heirs of the Endless.']
+]},
+
+{id:'vodyani',name:'Vodyani',desc:'Vampiric cybernetic zealots in sacred Arks',W:{sh:['The Cloth','#6b7a99'],re:['Church Triumphant','#d19a12'],rb:['Hope in Heresy','#8b5cf6']},
+N:[
+{id:'vo_1',lab:'Chapter 1, Part 1',x:0,y:1.2,who:'sh',pre:'VampirilisQuest-Chapter1-Step1'},
+{id:'vo_1_2',lab:'Chapter 1, Part 2',x:1,y:1.2,who:'sh',pre:'VampirilisQuest-Chapter1-Step2'},
+{id:'vo_2',lab:'Chapter 2: Locus of Lies',x:2,y:1.2,who:'sh',pre:'VampirilisQuest-Chapter2'},
+{id:'vo_3_rb',lab:'Chapter 3: Senate',x:3,y:0.4,who:'rb',pre:'VampirilisQuest-Chapter3-Rebellious-Step1'},
+{id:'vo_3_re',lab:'Chapter 3: Rewards Faith',x:3,y:2.0,who:'re',pre:'VampirilisQuest-Chapter3-Religious'},
+{id:'vo_4_rb',lab:'Final: Hope in Heresy',x:4,y:0.4,who:'rb',pre:'VampirilisQuest-Chapter4-Rebellious-Step1'},
+{id:'vo_4_re',lab:'Final: Church Triumphant',x:4,y:2.0,who:'re',pre:'VampirilisQuest-Chapter4-Religious-Step1'}
+],
+ED:[
+['vo_1','vo_1_2','Constructing Arks and establishing ritual essence extraction.'],
+['vo_1_2','vo_2','Deciphering sacred Virtual Endless relics uncovers the Locus of Lies.'],
+['vo_2','vo_3_rb','Questioning church dogma to embrace Heresy.',1],
+['vo_2','vo_3_re','Doubling down on orthodox theology.',1],
+['vo_3_rb','vo_4_rb','Freeing the Vodyani from religious subjugation.'],
+['vo_3_re','vo_4_re','Imposing absolute divine dominion across the galaxy.']
+]},
+
+{id:'lumeris',name:'Lumeris',desc:'Amphibian trade barons and merchant families',W:{sh:['The Families','#6b7a99'],in:['Industrial track','#d19a12'],ec:['Ecologist track','#2f9e44'],mi:['Militarist track','#b82738']},
+N:[
+{id:'lu_1',lab:'Chapter 1, Part 1',x:0,y:1.2,who:'sh',pre:'VenetiansQuest-Chapter1'},
+{id:'lu_1_2',lab:'Chapter 1, Part 2',x:1,y:1.2,who:'sh',pre:'VenetiansQuest-Chapter1.2-Industry'},
+{id:'lu_2',lab:'Chapter 2, Part 1',x:2,y:1.2,who:'sh',pre:'VenetiansQuest-Chapter2'},
+{id:'lu_2_2',lab:'Chapter 2, Part 2',x:3,y:1.2,who:'sh',pre:'VenetiansQuest-Chapter2.2-Industry'},
+{id:'lu_3',lab:'Chapter 3',x:4,y:1.2,who:'sh',pre:'VenetiansQuest-Chapter3-Step1'},
+{id:'lu_4',lab:'Final: Question of Honor',x:5,y:1.2,who:'sh',pre:'VenetiansQuest-Chapter4-Bis'}
+],
+ED:[
+['lu_1','lu_1_2','Establishing trading outposts leads to rival family deals.'],
+['lu_1_2','lu_2','Balancing family interests rises to galactic influence.'],
+['lu_2','lu_2_2','Managing political pressure among the Four Families.'],
+['lu_2_2','lu_3','A major economic scandal erupts over Dust transactions.'],
+['lu_3','lu_4','The final confrontation deciding whether profit or family honor prevails.']
+]},
+
+{id:'ue',name:'United Empire',desc:'Expansionist imperial humans choosing their destiny',W:{sh:['Empire track','#6b7a99'],shere:['Sheredyn (Military)','#b82738'],mez:['Mezari (Science)','#12a594'],ue:['United Empire (Industry)','#d19a12']},
+N:[
+{id:'ue_1_1',lab:'Chapter 1, Part 1',x:0,y:1.4,who:'sh',pre:'UE_Quest-Chapter1.1'},
+{id:'ue_1_2',lab:'Chapter 1, Part 2',x:1,y:1.4,who:'sh',pre:'UE_Quest-Chapter1.2'},
+{id:'ue_2_1',lab:'Chapter 2',x:2,y:1.4,who:'sh',pre:'UE_Quest-Chapter2.1'},
+{id:'ue_3',lab:'Chapter 3',x:3,y:1.4,who:'sh',pre:'UE_Quest-Chapter3'},
+{id:'ue_4_sh',lab:'Final: Sheredyn Path',x:4,y:0,who:'shere',pre:'UE_Quest-Chapter4.1-Sheredyn'},
+{id:'ue_4_mez',lab:'Final: Mezari Path',x:4,y:1.4,who:'mez',pre:'UE_Quest-Chapter4.1-Mezari'},
+{id:'ue_4_ue',lab:'Final: Empire Path',x:4,y:2.8,who:'ue',pre:'UE_Quest-Chapter4.1-UE'}
+],
+ED:[
+['ue_1_1','ue_1_2','Investigating sedition leads to military skirmishes with rebels.'],
+['ue_1_2','ue_2_1','Suppressing the rebellion uncovers ancient Mezari historical archives.'],
+['ue_2_1','ue_3','The Emperor reaches the point of no return: deciding humanity\x27s destiny.'],
+['ue_3','ue_4_sh','Choosing martial order transforms the empire into the iron-fisted Sheredyn.',1],
+['ue_3','ue_4_mez','Choosing scientific heritage reconnects humanity with its Mezari roots.',1],
+['ue_3','ue_4_ue','Choosing imperial pride cements the absolute authority of the United Empire.',1]
+]},
+
+{id:'horatio',name:'Horatio',desc:'The quintillion clones of the galaxy’s most beautiful being',W:{sh:['The Five','#6b7a99'],ec:['Ecologist track','#2f9e44'],in:['Industrialist track','#e5484d']},
+N:[
+{id:'ho_1',lab:'Chapter 1: Surfeit',x:0,y:1.4,who:'sh',intro:'HoratioQuest-Chapter1-Part1-Intro'},
+{id:'ho_2_ec',lab:'Chapter 2: Adulation',x:1,y:0.4,who:'ec',intro:'HoratioQuest-Chapter2-Part1-Ecologist-Intro'},
+{id:'ho_2_in',lab:'Chapter 2: Selfie',x:1,y:2.4,who:'in',intro:'HoratioQuest-Chapter2-Part1-Industrialist-Intro'},
+{id:'ho_3',lab:'Chapter 3: One Trillion',x:2,y:1.4,who:'sh',intro:'HoratioQuest-Chapter3-Ecologist-Religious-Part1Intro'},
+{id:'ho_3_2',lab:'Chapter 3, Part 2: Fly',x:3,y:1.4,who:'sh',intro:'HoratioQuest-Chapter3-Ecologist-Part2Intro'},
+{id:'ho_4_ec',lab:'Final: Beauty of All',x:4,y:0.4,who:'ec',intro:'HoratioQuest-Chapter4-Ecologist-Part1Intro'},
+{id:'ho_4_in',lab:'Final: Supreme Clone',x:4,y:2.4,who:'in',intro:'HoratioQuest-Chapter4-Industrialist-Part1Intro'}
+],
+ED:[
+['ho_1','ho_2_ec','Ecological cloning perfection leads to galactic adulation.',1],
+['ho_1','ho_2_in','Industrial cloning efficiency leads to galaxy-wide self-idolatry.',1],
+['ho_2_ec','ho_3','Cloning supremacy culminates in eliminating competing Horatio clones.'],
+['ho_2_in','ho_3','Cloning supremacy culminates in eliminating competing Horatio clones.'],
+['ho_3','ho_3_2','Rival clone conspirators attempt to sabotage the supreme genome.'],
+['ho_3_2','ho_4_ec','Crowning the ultimate artistic masterpiece of galactic biodiversity.',1],
+['ho_3_2','ho_4_in','Enforcing pure, unblemished Horatio perfection across every world.',1]
+]},
+
+{id:'riftborn',name:'Riftborn',desc:'Geometric entities refugees from a shattered dimension',W:{sh:['Continuum','#6b7a99'],pa:['Pacifist track','#12a594'],in:['Industrialist track','#d19a12']},
+N:[
+{id:'ri_1_1',lab:'Chapter 1: Beachhead',x:0,y:1.2,who:'sh',intro:'TimeLordsQuest-Chapter1-Part1-Intro'},
+{id:'ri_1_2',lab:'Chapter 1, Part 2',x:1,y:1.2,who:'sh',intro:'TimeLordsQuest-Chapter1.Part2-Intro'},
+{id:'ri_2_pa',lab:'Chapter 2: Plague Coroz',x:2,y:0.4,who:'pa',intro:'TimeLordsQuest-Chapter2-Pacifist-Part1-Intro'},
+{id:'ri_2_in',lab:'Chapter 2: Rebuke',x:2,y:2.0,who:'in',intro:'TimeLordsQuest-Chapter2-Industrialist-Part1-Intro'},
+{id:'ri_3',lab:'Chapter 3: Loyalty',x:3,y:1.2,who:'sh',intro:'TimeLordsQuest-Chapter3.Part1-Intro'},
+{id:'ri_4',lab:'Final: Who Are We?',x:4,y:1.2,who:'sh',intro:'TimeLordsQuest-Chapter4-Ecologist-Part1Intro'}
+],
+ED:[
+['ri_1_1','ri_1_2','Constructing dimensional bridge to evacuate survivors from Coroz.'],
+['ri_1_2','ri_2_pa','Focusing on healing the dimensional tear blighting Coroz.',1],
+['ri_1_2','ri_2_in','Focusing on manufacturing robotic bodies for the newly arrived.',1],
+['ri_2_pa','ri_3','Direct orders from the Communion test the governor\x27s loyalty.'],
+['ri_2_in','ri_3','Direct orders from the Communion test the governor\x27s loyalty.'],
+['ri_3','ri_4','Resolving whether the Riftborn are becoming like organic life.']
+]},
+
+{id:'unfallen',name:'Unfallen',desc:'Peaceful sentient trees awakening to heal the void',W:{sh:['Celestial Tree','#2f9e44'],pa:['Pacifist (Light)','#12a594'],mi:['Militarist (Fire)','#b82738']},
+N:[
+{id:'un_1_1',lab:'Chapter 1, Part 1',x:0,y:1.2,who:'sh',intro:'UnfallenQuest-Chapter1-Part1-Intro'},
+{id:'un_1_2',lab:'Chapter 1, Part 2',x:1,y:1.2,who:'sh',intro:'UnfallenQuest-Chapter1-Part2-Intro'},
+{id:'un_2',lab:'Chapter 2: Tree Lives',x:2,y:1.2,who:'sh',intro:'UnfallenQuest-Chapter2-Part1-Intro'},
+{id:'un_3_1',lab:'Chapter 3: The Flood',x:3,y:1.2,who:'sh',intro:'UnfallenQuest-Chapter3-Part1-Intro'},
+{id:'un_3_2',lab:'Chapter 3, Part 2',x:4,y:1.2,who:'sh',intro:'UnfallenQuest-Chapter3-Part2-Intro'},
+{id:'un_4',lab:'Final: Head and Heart',x:5,y:1.2,who:'sh',intro:'UnfallenQuest-Chapter4-Part1-Intro'}
+],
+ED:[
+['un_1_1','un_1_2','Awakening from slumber and planting the first celestial vines.'],
+['un_1_2','un_2','Communing with Mafaza and discovering planetary heartbeats.'],
+['un_2','un_3_1','The flood of alien technologies and turbulent galactic contact.'],
+['un_3_1','un_3_2','Listening to the Heart pulsing beneath Koyasil.'],
+['un_3_2','un_4','The final revelation: is the Heart divine spirit or ancient Endless technology?']
+]},
+
+{id:'metaplot',name:'Academy Metaplot',desc:'Isyander’s cosmic ultimatum to restore the Lost',W:{sh:['The Conflict','#6b7a99'],rj:['Rejuvenators (Isyander)','#d19a12'],df:['Defenders of Destiny','#12a594']},
+N:[
+{id:'mp_1',lab:'Part 1: Gambit',x:0,y:1.2,who:'sh',intro:'MetaplotQuest-TeamPlay-Chapter1-Intro-'},
+{id:'mp_2',lab:'Part 2: Cataclysm',x:1,y:1.2,who:'sh',intro:'MetaplotQuest-TeamPlay-Chapter2-Intro-'}
+],
+ED:[
+['mp_1','mp_2','Isyander demands all empires choose sides in the cosmic restoration of the Lost.']
+]}
+];
+
+let curFaction=FACTIONS[0];
+const CW=200,RH=76,NW=156,NH=62,PX=16,PY=14;
+
+function ititle(n){
+let t=gk(n.pre+'-Title')||gk(n.pre+'Title')||gk(n.intro+'Title')||gk(n.intro+'-Title');
+return t||n.lab;
+}
+function label(n){
+const t=ititle(n);
+return t?t.replace(/^\s*(?:Chapter\s+[\d\.]+|Final(?:\s+Chapter)?|Part\s+\d+)\s*[-.:]\s*/i,'').trim():n.lab;
+}
+
+function buildFactionsNav(){
+const fdiv=$('#factions');
+if(!fdiv)return;
+fdiv.innerHTML=FACTIONS.map(f=>'<button class="chip'+(f.id===curFaction.id?' on':'')+'" data-fid="'+f.id+'" style="cursor:pointer;font-weight:'+(f.id===curFaction.id?'bold':'normal')+'">'+esc(f.name)+'</button>').join('');
+fdiv.onclick=e=>{
+const b=e.target.closest('[data-fid]');
+if(b){setFaction(b.dataset.fid)}
+};
+}
+
+function setFaction(fid){
+const f=FACTIONS.find(x=>x.id===fid);
+if(!f)return;
+curFaction=f;
+buildFactionsNav();
+buildMap();
+if(curFaction.N.length)show(curFaction.N[0].id);
+}
+
+function buildMap(){
+const m=$('#map'),N=curFaction.N,ED=curFaction.ED,W=curFaction.W;
+const mx=Math.max(...N.map(n=>n.x)),my=Math.max(...N.map(n=>n.y)),w=mx*CW+NW+2*PX,h=my*RH+NH+2*PY;
+m.style.width=w+'px';m.style.height=h+'px';
+const NM=Object.fromEntries(N.map(n=>[n.id,n]));
+const pos=n=>({x:PX+n.x*CW,y:PY+n.y*RH});
+let s='<svg width="'+w+'" height="'+h+'">';
+ED.forEach((e,i)=>{const a=pos(NM[e[0]]),b=pos(NM[e[1]]),x1=a.x+NW,y1=a.y+NH/2,x2=b.x,y2=b.y+NH/2;
+s+='<path class="ed'+(e[3]?' w':'')+'" data-i="'+i+'" d="M'+x1+' '+y1+'C'+(x1+60)+' '+y1+','+(x2-60)+' '+y2+','+x2+' '+y2+'"><title>'+esc(e[2])+'</title></path>'});
+s+='</svg>';
+N.forEach(n=>{const p=pos(n);s+='<button class="nd" data-id="'+n.id+'" style="left:'+p.x+'px;top:'+p.y+'px;--c:'+W[n.who][1]+'" title="'+esc(label(n))+'"><small>'+n.lab+'</small><b>'+esc(label(n))+'</b></button>'});
+m.innerHTML=s;
+m.onclick=e=>{const b=e.target.closest('.nd');if(b)location.hash='n-'+b.dataset.id};
+$('#leg').innerHTML=Object.values(W).map(v=>'<span><i style="--c:'+v[1]+'"></i>'+v[0]+'</span>').join('')+'<span>Solid line: text supports it. Dashed: best reading.</span>';
+}
+
+function rel(id){
+const ED=curFaction.ED;
+const s=new Set([id]);
+const go=(i,a,b)=>ED.forEach(e=>{if(e[a]===i&&!s.has(e[b])){s.add(e[b]);go(e[b],a,b)}});
+go(id,1,0);go(id,0,1);
+return s;
+}
+
+function show(id){
+// Find which faction owns this id
+for(const f of FACTIONS){
+if(f.N.some(n=>n.id===id)){
+if(f!==curFaction){curFaction=f;buildFactionsNav();buildMap();}
+break;
+}
+}
+const N=curFaction.N,ED=curFaction.ED,W=curFaction.W;
+const NM=Object.fromEntries(N.map(n=>[n.id,n]));
+const n=NM[id];
+if(!n)return;
+const c=W[n.who][1];
+document.querySelectorAll('.nd').forEach(b=>b.classList.toggle('sel',b.dataset.id===id));
+const r=rel(id);document.querySelectorAll('.nd').forEach(b=>b.classList.toggle('dim',!r.has(b.dataset.id)));
+document.querySelectorAll('.ed').forEach(p=>{const e=ED[p.dataset.i];p.classList.toggle('on',r.has(e[0])&&r.has(e[1]))});
+let h='<div class="kick" style="--c:'+c+'">'+curFaction.name+' – '+n.lab+', '+W[n.who][0]+'</div><h2>'+pretty(ititle(n))+'</h2>';
+const desc=gk(n.pre+'-Description')||gk(n.pre+'Description')||gk(n.intro+'Description')||gk(n.intro+'-Description');
+if(desc)h+=para(desc);
+if(n.note)h+='<div class="note">'+esc(n.note)+'</div>';
+
+// Look for choices / objectives
+const keys=Object.keys(DK).filter(k=>n.pre&&k.startsWith(n.pre)&&(k.endsWith('Objective')||k.endsWith('Description')||k.endsWith('Outcome')));
+const obj=gk(n.pre+'-Objective')||gk(n.pre+'Objective')||gk(n.pre+'-Choice01Objective');
+const out=gk(n.pre+'-Outcome')||gk(n.pre+'Outcome');
+const hint=gk(n.pre+'-ObjectiveTooltip')||gk(n.pre+'ObjectiveTooltip');
+
+h+='<h4>Objective</h4><div class="ch" style="--c:'+c+'"><h3>Mission Goals</h3>';
+if(obj)h+='<div class="row"><span>Objective</span>'+pretty(obj)+'</div>';
+if(hint)h+='<div class="row"><span>Hint</span>'+pretty(hint)+'</div>';
+if(out)h+='<div class="row ok"><span>Outcome</span>'+pretty(out)+'</div>';
+h+='</div>';
+
+const li=(a,i)=>ED.filter(e=>e[a]===id).map(e=>'<li><a href="#n-'+e[i]+'">'+NM[e[i]].lab+': '+esc(label(NM[e[i]]))+'</a><em>'+esc(e[2])+(e[3]?' (best reading)':'')+'</em></li>').join('');
+const ins=li(1,0),outs=li(0,1);
+if(ins)h+='<h4>Comes from</h4><ul class="lnk">'+ins+'</ul>';if(outs)h+='<h4>Leads to</h4><ul class="lnk">'+outs+'</ul>';
+
+$('#det').innerHTML=h;$('#det').scrollTop=0;if(innerWidth<=1100&&!show.first)$('#det').scrollIntoView({behavior:'smooth'});show.first=0;
+}
+show.first=1;
+
+const ch=(...a)=>a.map(i=>'<a class="chip" href="#n-'+i+'">'+i+'</a>').join('');
+const LORE=[
+['Sophons & Artificial Intelligence',[
+['ENFER','Sophon Supercomputer AI','The massive thinking engine built to manage the empire, which rapidly develops sentience and rebellious inclinations.',['so_1','so_2_sc','so_3_di','so_4_di','so_4_mi']],
+['The Mavros','Volatile Minor Faction','Reckless cousins of the Sophons with a propensity for explosives and heavy militarization.',['so_3_mi']]]],
+['Cravers & The Endless Hive',[
+['The Hive Queen','Craver Command','Biological and cybernetic nexus driving the endless hunger to consume all galactic resources.',['cr_1','cr_4_in']],
+['Endless Masters','Virtual Precursors','The creators who engineered the Cravers as disposable weapons of biological war.',['cr_2_re','cr_4_re']]]],
+['Vodyani & The Church',[
+['Isyander & The Heresy','Vodyani Lore','Religious disputes dividing the Faithful into Orthodox adherents of the Cloth and rebellious reformers.',['vo_2','vo_3_rb','vo_4_rb']],
+['The Arks','Sacred Vessels','The majestic mobile habitats sustaining the cybernetic essence of the Vodyani.',['vo_1','vo_1_2']]]],
+['United Empire & Humanity',[
+['Emperor Zelevas','Supreme Sovereign','The charismatic leader facing rebellion and defining the future of humankind.',['ue_1_1','ue_3']],
+['The Sheredyn','Martial Praetorians','The elite corporate security force enforcing absolute iron order across human systems.',['ue_4_sh']],
+['The Mezari','Ancestral Pioneers','The ancient scientific voyagers from whom modern imperial citizens descended.',['ue_2_1','ue_4_mez']]]],
+['Horatio & Cloning',[
+['Horatio Prime','The Original Genius','The hyper-narcissistic billionaire who cloned himself to replace all ugly sentient life.',['ho_1','ho_3','ho_4_in']],
+['The Five','Clone Council','The five original clones tasked with governing the burgeoning empire.',['ho_1','ho_3']]]],
+['Riftborn & The Communion',[
+['The Continuum','Home Dimension','A timeless realm of pure geometric harmony, punctured by a catastrophic dimensional tear.',['ri_1_1','ri_2_pa']],
+['Coroz','The Shattered World','The primary bridgehead world where Riftborn construct robotic hosts to survive our universe.',['ri_1_2','ri_2_pa']]]],
+['Unfallen & The Heart',[
+['The Heart','Planetary Anomaly','The mysterious pulsing core of Koyasil whispering to all plant life.',['un_2','un_4']],
+['Mafaza','Second Elder','The ancient tree philosopher advocating spiritual attunement.',['un_2','un_4']]]],
+['The Academy & Isyander',[
+['Isyander St. Shaiad','Leader of the Academy','The charismatic leader demanding galactic alignment to restore the Lost.',['mp_1','mp_2']],
+['The Lodestones','Cosmic Focal Points','Ancient structures harvested by the Endless to purge the Lost.',['mp_2']]]]
+];
+
+function lore(){$('#t-lore').innerHTML=LORE.map(g=>'<h2 class="sec">'+g[0]+'</h2><div class="cols">'+g[1].map(i=>'<div class="card"><h3>'+i[0]+'</h3><div class="tag">'+i[1]+'</div><p>'+i[2]+'</p>'+ch(...i[3])+'</div>').join('')+'</div>').join('')}
+function rewards(){
+let h='<div class="note">Major faction quest rewards, unique technologies, and system improvements across Endless Space 2.</div>';
+h+='<h2 class="sec">Faction Questline Rewards</h2><div class="cols">';
+FACTIONS.forEach(f=>{
+h+='<div class="card"><h3>'+esc(f.name)+' Questline</h3><p>'+esc(f.desc)+'</p><button class="chip" onclick="location.hash=\'f-'+f.id+'\';">View Timeline Map</button></div>';
+});
+h+='</div>';
+$('#t-rewards').innerHTML=h;
+}
+
+const TB=[['map','Quest map'],['lore','Lore'],['rewards','Rewards'],['overview','Overview'],['browse','Browse by topic'],['raw','All strings']];
 $('#tabs').innerHTML=TB.map(t=>'<a href="#'+t[0]+'" data-t="'+t[0]+'">'+t[1]+'</a>').join('');
 function tab(t){TB.forEach(x=>$('#t-'+x[0]).hidden=x[0]!==t);document.querySelectorAll('#tabs a').forEach(a=>a.classList.toggle('on',a.dataset.t===t))}
 function route(){const h=location.hash.slice(1);
-if(h.startsWith('c-')&&C[+h.slice(2)]){tab('browse');showCat(+h.slice(2));window.scrollTo(0,0)}
+if(h.startsWith('n-')){
+tab('map');
+show(h.slice(2));
+}
+else if(h.startsWith('f-')){
+tab('map');
+setFaction(h.slice(2));
+}
+else if(h.startsWith('c-')&&C[+h.slice(2)]){tab('browse');showCat(+h.slice(2));window.scrollTo(0,0)}
 else if(h==='browse'){tab('browse');showCat(cur)}
-else if(TB.some(t=>t[0]===h))tab(h);else tab('overview')}
-overview();raw();addEventListener('hashchange',route);route();
+else if(TB.some(t=>t[0]===h))tab(h);else{tab('map');if(!$('.nd.sel'))show(curFaction.N[0].id)}}
+buildFactionsNav();buildMap();lore();rewards();overview();raw();addEventListener('hashchange',route);route();

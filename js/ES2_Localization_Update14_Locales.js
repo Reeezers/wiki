@@ -53,11 +53,71 @@ $('#rawn').textContent=r.length+' of '+D.length+' strings'+(q?' match â€œ'+q+'â€
 $('#rawl').innerHTML=r.slice(0,rawLim).map(i=>rawRow(i,true)).join('')+(r.length>rawLim?'<button class="more" data-more="1">Show 300 more</button>':'')}
 $('#rawl').onclick=e=>{if(e.target.closest('.more')){rawLim+=300;raw();return}if(e.target.closest('a'))return;const r=e.target.closest('.rw');if(r)r.classList.toggle('open')};
 $('#q').oninput=()=>{rawLim=300;raw();if(location.hash!=='#raw')location.hash='raw'};
-const TB=[['overview','Overview'],['browse','Browse by topic'],['raw','All strings']];
+/* ===== Quest map (same layout as the DLC 2 wiki) ===== */
+const DK=Object.fromEntries(D.map(d=>[d[0],d[1]]));
+const para=s=>String(s||'').replace(/\\n/g,'\n').split('\n').filter(x=>x.trim()&&!/^\s*-{3,}\s*$/.test(x)||0).map(x=>'<p>'+pretty(x)+'</p>').join('');
+const W={bx:['Basryxo Storyline','#2f9e44'],cl:['Ecology & Cleanup','#12a594'],ht:['Health & Society','#d19a12']};
+const N=[
+{id:'p1',lab:'Part 1: Munchie Madness',x:0,y:1.2,who:'bx',intro:'PopulationQuest27_Part1-Intro',ch:[{pre:'PopulationQuest27_Part1-1'},{pre:'PopulationQuest27_Part1-3'},{pre:'PopulationQuest27_Part1-4'}]},
+{id:'p2a',lab:'Part 2A: Food Hangover',x:1,y:0.4,who:'cl',intro:'PopulationQuest27_Part2A-Intro',ch:[{pre:'PopulationQuest27_Part2A-1'},{pre:'PopulationQuest27_Part2A-2'}]},
+{id:'p2b',lab:'Part 2B: Not Healthy',x:1,y:2.0,who:'ht',intro:'PopulationQuest27_Part2B-Intro',ch:[{pre:'PopulationQuest27_Part2B-1'},{pre:'PopulationQuest27_Part2B-2'}]}
+];
+const NM=Object.fromEntries(N.map(n=>[n.id,n]));
+const ED=[
+['p1','p2a','Mass fast food consumption leads to cluttered streets and waste disposal problems.',1],
+['p1','p2b','Intensive food production leads to metabolic and public health challenges.',1]
+];
+const CW=220,RH=85,NW=165,NH=65,PX=16,PY=14;
+const gk=k=>DK[k];
+function ititle(n){return gk(n.intro+'Title')||n.lab}
+function label(n){return ititle(n)}
+function buildMap(){const m=$('#map'),mx=Math.max(...N.map(n=>n.x)),my=Math.max(...N.map(n=>n.y)),w=mx*CW+NW+2*PX,h=my*RH+NH+2*PY;m.style.width=w+'px';m.style.height=h+'px';
+const pos=n=>({x:PX+n.x*CW,y:PY+n.y*RH});
+let s='<svg width="'+w+'" height="'+h+'">';
+ED.forEach((e,i)=>{const a=pos(NM[e[0]]),b=pos(NM[e[1]]),x1=a.x+NW,y1=a.y+NH/2,x2=b.x,y2=b.y+NH/2;
+s+='<path class="ed'+(e[3]?' w':'')+'" data-i="'+i+'" d="M'+x1+' '+y1+'C'+(x1+60)+' '+y1+','+(x2-60)+' '+y2+','+x2+' '+y2+'"><title>'+esc(e[2])+'</title></path>'});
+s+='</svg>';
+N.forEach(n=>{const p=pos(n);s+='<button class="nd" data-id="'+n.id+'" style="left:'+p.x+'px;top:'+p.y+'px;--c:'+W[n.who][1]+'" title="'+esc(label(n))+'"><small>'+n.lab+'</small><b>'+esc(label(n))+'</b></button>'});
+m.innerHTML=s;m.onclick=e=>{const b=e.target.closest('.nd');if(b)location.hash='n-'+b.dataset.id};
+$('#leg').innerHTML=Object.values(W).map(v=>'<span><i style="--c:'+v[1]+'"></i>'+v[0]+'</span>').join('')+'<span>Solid line: text supports it. Dashed: best reading.</span>'}
+function rel(id){const s=new Set([id]);const go=(i,a,b)=>ED.forEach(e=>{if(e[a]===i&&!s.has(e[b])){s.add(e[b]);go(e[b],a,b)}});go(id,1,0);go(id,0,1);return s}
+const FL=[['Description','Briefing',''],['Objective','Objective',''],['ObjectiveTooltip','Hint',''],['Outcome','If completed','ok']];
+function card(c,col){const t=gk(c.pre+'Title');let h='<div class="ch" style="--c:'+col+'"><h3>'+(t?pretty(t):'Choice')+'</h3>';
+FL.forEach(f=>{const v=gk(c.pre+f[0]);if(v!=null&&v.trim())h+='<div class="row '+f[2]+'"><span>'+f[1]+'</span>'+pretty(v)+'</div>'});
+return h+'</div>'}
+function show(id){const n=NM[id],c=W[n.who][1];
+document.querySelectorAll('.nd').forEach(b=>b.classList.toggle('sel',b.dataset.id===id));
+const r=rel(id);document.querySelectorAll('.nd').forEach(b=>b.classList.toggle('dim',!r.has(b.dataset.id)));
+document.querySelectorAll('.ed').forEach(p=>{const e=ED[p.dataset.i];p.classList.toggle('on',r.has(e[0])&&r.has(e[1]))});
+let h='<div class="kick" style="--c:'+c+'">'+n.lab+', '+W[n.who][0]+'</div><h2>'+pretty(ititle(n))+'</h2>'+para(gk(n.intro+'Description'));
+h+='<h4>Choose one</h4>';
+n.ch.forEach(x=>h+=card(x,c));
+const li=(a,i)=>ED.filter(e=>e[a]===id).map(e=>'<li><a href="#n-'+e[i]+'">'+NM[e[i]].lab+': '+esc(label(NM[e[i]]))+'</a><em>'+esc(e[2])+(e[3]?' (best reading)':'')+'</em></li>').join('');
+const ins=li(1,0),outs=li(0,1);
+if(ins)h+='<h4>Comes from</h4><ul class="lnk">'+ins+'</ul>';if(outs)h+='<h4>Leads to</h4><ul class="lnk">'+outs+'</ul>';
+$('#det').innerHTML=h;$('#det').scrollTop=0;if(innerWidth<=1100&&!show.first)$('#det').scrollIntoView({behavior:'smooth'});show.first=0}
+show.first=1;
+const ch=(...a)=>a.map(i=>'<a class="chip" href="#n-'+i+'">'+NM[i].lab+'</a>').join('');
+const LORE=[['People & Minor Factions',[
+['The Basryxo','Minor Faction','Gluttonous, industrious scavenger creatures who love savory junk foods and garbage recycling.',['p1','p2a','p2b']],
+['Garth Brik','Basryxo Hero','Charismatic scavenger administrator balancing public joy with municipal hygiene.',[]]]],
+['Social Phenomena',[
+['Harok Munchies','Street Food Craze','The coolest, tastiest treat across the galaxy, causing massive culinary euphoria.',['p1']],
+['Garbage Crisis','Urban Overload','The aftermath of the fast food boom, choking street drains with wrapper litter.',['p2a']],
+['Nutritional Decline','Health Epidemic','The societal challenge when a population consumes too much processed food.',['p2b']]]]];
+function lore(){$('#t-lore').innerHTML=LORE.map(g=>'<h2 class="sec">'+g[0]+'</h2><div class="cols">'+g[1].map(i=>'<div class="card"><h3>'+i[0]+'</h3><div class="tag">'+i[1]+'</div><p>'+i[2]+'</p>'+ch(...i[3])+'</div>').join('')+'</div>').join('')}
+function rewards(){let h='<div class="note">'+esc(DK.Update14Title||'Update 14')+': '+pretty(DK.Update14Description||'Muck and Makers update')+'</div>';
+h+='<h2 class="sec">Faction Traits & Bonuses</h2><div class="cols">';
+h+='<div class="card"><h3>'+esc(DK.FactionTraitMinorBasryxoTitle||'Basryxo Population')+'</h3><p>'+pretty(DK.FactionTraitMinorBasryxoDescription||'')+'</p></div>';
+h+='<div class="card"><h3>'+esc(DK.AffinityGameplayBasryxoTitle||'Trash to Treasure')+'</h3><p>'+pretty(DK.AffinityGameplayBasryxoDescription||'')+'</p></div>';
+h+='</div>';
+$('#t-rewards').innerHTML=h}
+const TB=[['map','Quest map'],['lore','Lore'],['rewards','Rewards'],['overview','Overview'],['browse','Browse by topic'],['raw','All strings']];
 $('#tabs').innerHTML=TB.map(t=>'<a href="#'+t[0]+'" data-t="'+t[0]+'">'+t[1]+'</a>').join('');
 function tab(t){TB.forEach(x=>$('#t-'+x[0]).hidden=x[0]!==t);document.querySelectorAll('#tabs a').forEach(a=>a.classList.toggle('on',a.dataset.t===t))}
 function route(){const h=location.hash.slice(1);
-if(h.startsWith('c-')&&C[+h.slice(2)]){tab('browse');showCat(+h.slice(2));window.scrollTo(0,0)}
+if(h.startsWith('n-')&&NM[h.slice(2)]){tab('map');show(h.slice(2))}
+else if(h.startsWith('c-')&&C[+h.slice(2)]){tab('browse');showCat(+h.slice(2));window.scrollTo(0,0)}
 else if(h==='browse'){tab('browse');showCat(cur)}
-else if(TB.some(t=>t[0]===h))tab(h);else tab('overview')}
-overview();raw();addEventListener('hashchange',route);route();
+else if(TB.some(t=>t[0]===h))tab(h);else{tab('map');if(!$('.nd.sel'))show('p1')}}
+buildMap();lore();rewards();overview();raw();addEventListener('hashchange',route);route();

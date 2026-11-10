@@ -355,6 +355,11 @@ a:visited {
     text-decoration:none;
     color:#000;
 }
+.chip.on {
+    background:#000080;
+    color:#fff;
+    border-color:#404040 #fff #fff #404040;
+}
 h2.sec {
     margin:18px 0 8px;
     font-size:14px;

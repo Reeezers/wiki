@@ -53,11 +53,110 @@ $('#rawn').textContent=r.length+' of '+D.length+' strings'+(q?' match “'+q+'�
 $('#rawl').innerHTML=r.slice(0,rawLim).map(i=>rawRow(i,true)).join('')+(r.length>rawLim?'<button class="more" data-more="1">Show 300 more</button>':'')}
 $('#rawl').onclick=e=>{if(e.target.closest('.more')){rawLim+=300;raw();return}if(e.target.closest('a'))return;const r=e.target.closest('.rw');if(r)r.classList.toggle('open')};
 $('#q').oninput=()=>{rawLim=300;raw();if(location.hash!=='#raw')location.hash='raw'};
-const TB=[['overview','Overview'],['browse','Browse by topic'],['raw','All strings']];
+/* ===== Quest map (same layout as the DLC 2 wiki) ===== */
+const DK=Object.fromEntries(D.map(d=>[d[0],d[1]]));
+const para=s=>String(s||'').replace(/\\n/g,'\n').split('\n').filter(x=>x.trim()&&!/^\s*-{3,}\s*$/.test(x)||0).map(x=>'<p>'+pretty(x)+'</p>').join('');
+const Q='LostTemplarsQuest-';
+const W={sh:['Shared track','#6b7a99'],re:['Religious track','#d19a12'],ec:['Ecologist track','#2f9e44'],mi:['Militarist track','#b82738'],pa:['Pacifist track','#12a594'],sd:['Related quest','#8b5cf6']};
+const N=[
+{id:'1a',lab:'Chapter 1, part 1',x:0,y:1.4,who:'sh',intro:Q+'Chapter1-Part1-Intro',ch:[{pre:Q+'Chapter1-Part1-Religious'},{pre:Q+'Chapter1-Part1-Ecologist'}]},
+{id:'1ba',lab:'Chapter 1, part 2A (Religious)',x:1,y:0,who:'re',intro:Q+'Chapter1-Part2A-Intro',ch:[{pre:Q+'Chapter1-Part2A-Religious'}]},
+{id:'1bb',lab:'Chapter 1, part 2B (Ecologist)',x:1,y:2.4,who:'ec',intro:Q+'Chapter1-Part2B-Intro',ch:[{pre:Q+'Chapter1-Part2B-Ecologist'}]},
+{id:'2',lab:'Chapter 2',x:2,y:1.4,who:'re',intro:Q+'Chapter2-Intro',ch:[{pre:Q+'Chapter2-Part1A-Religious'},{pre:Q+'Chapter2-Part1B-Religious'},{pre:Q+'Chapter2-Part1C-Religioust',t:Q+'Chapter2-Part1C-ReligioustTitle'}]},
+{id:'3',lab:'Chapter 3',x:3,y:1.4,who:'sh',intro:Q+'Chapter3-Intro',ch:[{pre:Q+'Chapter3-Military'},{pre:Q+'Chapter3-Pacifist'}]},
+{id:'4_1a',lab:'Chapter 4, part 1A',x:4,y:0,who:'mi',intro:Q+'Chapter4-Part1A-Intro',ch:[{pre:Q+'Chapter4-Part1A-Military'},{pre:Q+'Chapter4-Part1A-Ecologist'},{pre:Q+'Chapter4-Part1A-Pacifist'}]},
+{id:'4_1b',lab:'Chapter 4, part 1B',x:4,y:2.4,who:'pa',intro:Q+'Chapter4-Part1B-Intro',ch:[{pre:Q+'Chapter4-Part1B-Ecologist'},{pre:Q+'Chapter4-Part1B-Pacifist'}]},
+{id:'4_2a',lab:'Final chapter 2A (Academy)',x:5,y:0,who:'re',intro:Q+'Chapter4-Part2A-Intro',ch:[{pre:Q+'Chapter4-Part2A-Religious'}]},
+{id:'4_2b',lab:'Final chapter 2B (Sovereign)',x:5,y:2.4,who:'ec',intro:Q+'Chapter4-Part2B-Intro',ch:[{pre:Q+'Chapter4-Part2B-Ecologist'}]},
+{id:'p28',lab:'Population quest 28',x:0,y:3.8,who:'sd',intro:'PopulationQuest28-Intro',ch:[{pre:'PopulationQuest28-Religious'},{pre:'PopulationQuest28-Ecologist'},{pre:'PopulationQuest28-Pacifist'}],note:'Nakalim population quest: “The Reborn”. Address murmurs of discontent and honor Sobra.'},
+{id:'p28a',lab:'The Reborn, part 2A',x:1,y:3.8,who:'sd',intro:'PopulationQuest28-2A-Intro',ch:[{pre:'PopulationQuest28-2A-Science'}]},
+{id:'p28b',lab:'The Reborn, part 2B',x:2,y:3.8,who:'sd',intro:'PopulationQuest28-2B-Intro',ch:[{pre:'PopulationQuest28-2B-Military'},{pre:'PopulationQuest28-2B-Pacifist'}]}
+];
+const NM=Object.fromEntries(N.map(n=>[n.id,n]));
+const ED=[
+['1a','1ba','RISE UP (Religious) choice emphasizes spiritual rituals and leads to Part 2A.',1],
+['1a','1bb','BUILD UP (Ecologist) choice prioritizes rapid world expansion and leads to Part 2B.',1],
+['1ba','2','Both awakening paths encounter religious unrest and strikes in Chapter 2.'],
+['1bb','2','Both awakening paths encounter religious unrest and strikes in Chapter 2.'],
+['2','3','Reaffirming the faith enables Queen Marusia to turn to Chapter 3: The Seduction of Hope.'],
+['3','4_1a','Military POWER choice leads to Chapter 4 Part 1A (martial dominance or temple conversion).',1],
+['3','4_1b','Pacifist PRESSURE choice leads to Chapter 4 Part 1B (offerings to the Academy and trade multiplication).',1],
+['4_1a','4_2a','Religious devotion or Academy convergence leads to Part 2A: joining Isyander.',1],
+['4_1b','4_2b','Economic and ecological sovereignty leads to Part 2B: thriving independently.',1],
+['p28','p28a','Approval path leads to Part 2A (Knowledge).',1],
+['p28','p28b','Academy donation path leads to Part 2B (Strength or Wealth).',1]
+];
+const CW=200,RH=76,NW=156,NH=62,PX=16,PY=14;
+const gk=k=>DK[k];
+function ititle(n){let t=gk(n.intro+'Title');if(t==null&&n.intro.endsWith('-'))t=gk(n.intro+'Title');return t}
+function label(n){const t=ititle(n);return t?t.replace(/^\s*(?:Chapter\s+\d+|Final Chapter)\s*[-.]\s*/,'').trim():n.lab}
+function chs(n){if(n.ch)return n.ch;return Object.keys(DK).filter(k=>k.startsWith(n.auto)&&/\d\dTitle$/.test(k)).sort().map(k=>({pre:k.slice(0,-5)}))}
+function buildMap(){const m=$('#map'),mx=Math.max(...N.map(n=>n.x)),my=Math.max(...N.map(n=>n.y)),w=mx*CW+NW+2*PX,h=my*RH+NH+2*PY;m.style.width=w+'px';m.style.height=h+'px';
+const pos=n=>({x:PX+n.x*CW,y:PY+n.y*RH});
+let s='<svg width="'+w+'" height="'+h+'">';
+ED.forEach((e,i)=>{const a=pos(NM[e[0]]),b=pos(NM[e[1]]),x1=a.x+NW,y1=a.y+NH/2,x2=b.x,y2=b.y+NH/2;
+s+='<path class="ed'+(e[3]?' w':'')+'" data-i="'+i+'" d="M'+x1+' '+y1+'C'+(x1+60)+' '+y1+','+(x2-60)+' '+y2+','+x2+' '+y2+'"><title>'+esc(e[2])+'</title></path>'});
+s+='</svg>';
+N.forEach(n=>{const p=pos(n);s+='<button class="nd" data-id="'+n.id+'" style="left:'+p.x+'px;top:'+p.y+'px;--c:'+W[n.who][1]+'" title="'+esc(label(n))+'"><small>'+n.lab+'</small><b>'+esc(label(n))+'</b></button>'});
+m.innerHTML=s;m.onclick=e=>{const b=e.target.closest('.nd');if(b)location.hash='n-'+b.dataset.id};
+$('#leg').innerHTML=Object.values(W).map(v=>'<span><i style="--c:'+v[1]+'"></i>'+v[0]+'</span>').join('')+'<span>Solid line: text supports it. Dashed: best reading.</span>'}
+function rel(id){const s=new Set([id]);const go=(i,a,b)=>ED.forEach(e=>{if(e[a]===i&&!s.has(e[b])){s.add(e[b]);go(e[b],a,b)}});go(id,1,0);go(id,0,1);return s}
+const FL=[['Description','Briefing',''],['Objective','Objective',''],['ObjectiveTooltip','Hint',''],['BisObjective','Alternative objective',''],['BisObjectiveTooltip','Alternative hint',''],['AltObjective','Alternative objective',''],['AltObjectiveTooltip','Alternative hint',''],['Outcome','If completed','ok'],['Outcome1','Outcome (Option 1)','ok'],['Outcome2','Outcome (Option 2)','ok'],['BisOutcome','If completed (alt)','ok']];
+function card(c,col){const t=gk(c.t||c.pre+'Choice')||gk(c.pre+'Title');let h='<div class="ch" style="--c:'+col+'"><h3>'+(t?pretty(t):'Objective')+'</h3>';
+FL.forEach(f=>{const v=gk(c.pre+f[0]);if(v!=null&&v.trim())h+='<div class="row '+f[2]+'"><span>'+f[1]+'</span>'+pretty(v)+'</div>'});
+if(c.rw&&gk(c.rw))h+='<div class="row"><span>Reward</span>'+pretty(gk(c.rw))+'</div>';
+return h+'</div>'}
+function show(id){const n=NM[id],c=W[n.who][1];
+document.querySelectorAll('.nd').forEach(b=>b.classList.toggle('sel',b.dataset.id===id));
+const r=rel(id);document.querySelectorAll('.nd').forEach(b=>b.classList.toggle('dim',!r.has(b.dataset.id)));
+document.querySelectorAll('.ed').forEach(p=>{const e=ED[p.dataset.i];p.classList.toggle('on',r.has(e[0])&&r.has(e[1]))});
+let h='<div class="kick" style="--c:'+c+'">'+n.lab+', '+W[n.who][0]+'</div><h2>'+pretty(ititle(n)||n.lab)+'</h2>'+para(gk(n.intro+'Description'));
+if(n.note)h+='<div class="note">'+esc(n.note)+'</div>';
+const cs=chs(n);
+if(cs.length>1)h+='<h4>Choose one</h4>';else h+='<h4>Objective</h4>';
+cs.forEach(x=>h+=card(x,c));
+const li=(a,i)=>ED.filter(e=>e[a]===id).map(e=>'<li><a href="#n-'+e[i]+'">'+NM[e[i]].lab+': '+esc(label(NM[e[i]]))+'</a><em>'+esc(e[2])+(e[3]?' (best reading)':'')+'</em></li>').join('');
+const ins=li(1,0),outs=li(0,1);
+if(ins)h+='<h4>Comes from</h4><ul class="lnk">'+ins+'</ul>';if(outs)h+='<h4>Leads to</h4><ul class="lnk">'+outs+'</ul>';
+const rw=SRC.filter(e=>e[1].includes(id));
+if(rw.length)h+='<h4>Likely reward</h4><ul class="lnk">'+rw.map(e=>'<li><a href="#rewards">'+esc(e[2])+'</a></li>').join('')+'</ul>';
+$('#det').innerHTML=h;$('#det').scrollTop=0;if(innerWidth<=1100&&!show.first)$('#det').scrollIntoView({behavior:'smooth'});show.first=0}
+show.first=1;
+/* likely sources */
+const SRC=[['StarSystemImprovementQuestTemplars01',['2'],'Temple of the Denaserdi'],['StarSystemImprovementQuestTemplars02',['2'],'Galactic Faith Museum'],
+['EmpireImprovementQuestTemplars01',['3'],'Reliquary of Glory'],['EmpireImprovementQuestTemplars02',['3'],'Relic Reliquary'],
+['StarSystemImprovementQuestTemplars03',['4_1a','4_2a'],'Relic Exploitation Site'],['StarSystemImprovementQuestTemplars04',['4_1b','4_2b'],'Center for Denaserdi Remembrance']];
+const ch=(...a)=>a.map(i=>'<a class="chip" href="#n-'+i+'">'+NM[i].lab+'</a>').join('');
+const LORE=[['People',[
+['Queen Marusia','Queen of the Nakalim','Of the royal Mapagna family. Awoke from hibernation after her parents died to restore the Nakalim and fulfill ancient prophecies.',['1a','1ba','1bb','2','3','4_1a','4_1b','4_2a','4_2b']],
+['Isyander St. Shaiad','Leader of the Academy','The prophet who brought tales of the Ultimate Academy of Truth and Repentance, seeking repentance for the Endless\x27 slaughter of the Lost.',['1a','4_1b','4_2a','p28b']],
+['Sobra','The Lost Sun God','The deity revered by the Nakalim. Its death at the hands of the Endless triggered centuries of Nakalim decline and hibernation.',['1a','p28']],
+['Abayanoryd','Xirmisala Hero','Leader of the crystalline Xirmisala, offering empathic communion and Dust sensitivity.',[]],
+['Morya Kupas','Nakalim Hero','A revered leader from the ancient holy orders of the Nakalim.',[]],
+['Panako Nakatug','Nakalim Hero','Warrior scholar experienced in relic excavation and temple administration.',[]]]],
+['Factions and Ideologies',[
+['The Nakalim','Major Faction','An ancient devout empire awakening from millennia of hibernation after the fall of their gods.',['1a','2','3','4_1a','4_1b','4_2a','4_2b']],
+['Remembrance of Sobra','State Religion','Venerates the Lost and prophesies their rebirth and resurrection.',['1a','p28']],
+['The Academy','Galactic Organization','The city-state founded by Isyander, centered on the ancient holy site of Muvel.',['1a','4_2a','p28b']],
+['The Xirmisala','Minor Faction','Exotic crystalline beings attuned to the cries of the Lost.',[]]]],
+['Sacred Relics & Monuments',[
+['Relics of the Lost','Holy Artifacts','Ancient remnants containing residual cosmic knowledge and Lost energy, uncovered across the galaxy.',['3','4_1a']],
+['Temple of the Denaserdi','Star System Improvement','Grand sanctuaries dedicated to ancestral remembrance and cultural revival.',['2']],
+['Galactic Faith Museum','Star System Improvement','Preserves ancient texts and artifacts for study by theologians and scholars.',['2']],
+['Reliquary of Glory','Empire Improvement','Monumental empire improvement channeling religious reverence into galactic authority.',['3']]]]];
+function lore(){$('#t-lore').innerHTML=LORE.map(g=>'<h2 class="sec">'+g[0]+'</h2><div class="cols">'+g[1].map(i=>'<div class="card"><h3>'+i[0]+'</h3><div class="tag">'+i[1]+'</div><p>'+i[2]+'</p>'+ch(...i[3])+'</div>').join('')+'</div>').join('')}
+function rewards(){let h='<div class="note">Unique system and empire improvements from the Nakalim questline.</div>';
+const card2=(b,extra)=>'<div class="card"><h3>'+esc(DK[b+'Title'])+'</h3>'+(DK[b+'Description']?'<p>'+pretty(DK[b+'Description'])+'</p>':'')+(DK[b+'EffectOverride']?'<div class="eff">'+pretty(DK[b+'EffectOverride'])+'</div>':'')+(DK[b+'TooltipEffect']?'<div class="eff">'+pretty(DK[b+'TooltipEffect'])+'</div>':'')+(extra||'')+'</div>';
+const src=b=>{const s=SRC.find(x=>x[0]===b);return s?'<p>Likely source: '+ch(...s[1])+'</p>':''};
+h+='<h2 class="sec">Empire improvements</h2><div class="cols">'+['EmpireImprovementQuestTemplars01','EmpireImprovementQuestTemplars02'].map(b=>card2(b,src(b))).join('')+'</div>';
+h+='<h2 class="sec">Star system improvements</h2><div class="cols">'+['StarSystemImprovementQuestTemplars01','StarSystemImprovementQuestTemplars02','StarSystemImprovementQuestTemplars03','StarSystemImprovementQuestTemplars04'].map(b=>card2(b,src(b))).join('')+'</div>';
+$('#t-rewards').innerHTML=h}
+const TB=[['map','Quest map'],['lore','Lore'],['rewards','Rewards'],['overview','Overview'],['browse','Browse by topic'],['raw','All strings']];
 $('#tabs').innerHTML=TB.map(t=>'<a href="#'+t[0]+'" data-t="'+t[0]+'">'+t[1]+'</a>').join('');
 function tab(t){TB.forEach(x=>$('#t-'+x[0]).hidden=x[0]!==t);document.querySelectorAll('#tabs a').forEach(a=>a.classList.toggle('on',a.dataset.t===t))}
 function route(){const h=location.hash.slice(1);
-if(h.startsWith('c-')&&C[+h.slice(2)]){tab('browse');showCat(+h.slice(2));window.scrollTo(0,0)}
+if(h.startsWith('n-')&&NM[h.slice(2)]){tab('map');show(h.slice(2))}
+else if(h.startsWith('c-')&&C[+h.slice(2)]){tab('browse');showCat(+h.slice(2));window.scrollTo(0,0)}
 else if(h==='browse'){tab('browse');showCat(cur)}
-else if(TB.some(t=>t[0]===h))tab(h);else tab('overview')}
-overview();raw();addEventListener('hashchange',route);route();
+else if(TB.some(t=>t[0]===h))tab(h);else{tab('map');if(!$('.nd.sel'))show('1a')}}
+buildMap();lore();rewards();overview();raw();addEventListener('hashchange',route);route();

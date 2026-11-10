@@ -53,11 +53,110 @@ $('#rawn').textContent=r.length+' of '+D.length+' strings'+(q?' match “'+q+'�
 $('#rawl').innerHTML=r.slice(0,rawLim).map(i=>rawRow(i,true)).join('')+(r.length>rawLim?'<button class="more" data-more="1">Show 300 more</button>':'')}
 $('#rawl').onclick=e=>{if(e.target.closest('.more')){rawLim+=300;raw();return}if(e.target.closest('a'))return;const r=e.target.closest('.rw');if(r)r.classList.toggle('open')};
 $('#q').oninput=()=>{rawLim=300;raw();if(location.hash!=='#raw')location.hash='raw'};
-const TB=[['overview','Overview'],['browse','Browse by topic'],['raw','All strings']];
+/* ===== Quest map (same layout as the DLC 2 wiki) ===== */
+const DK=Object.fromEntries(D.map(d=>[d[0],d[1]]));
+const para=s=>String(s||'').replace(/\\n/g,'\n').split('\n').filter(x=>x.trim()&&!/^\s*-{3,}\s*$/.test(x)||0).map(x=>'<p>'+pretty(x)+'</p>').join('');
+const Q='VaultersQuest-';
+const W={sh:['Shared track','#6b7a99'],sc:['Scientist track','#12a594'],mi:['Militarist track','#b82738'],sd:['Related quest','#d19a12']};
+const N=[
+{id:'1a',lab:'Chapter 1, part 1',x:0,y:1.3,who:'sh',intro:Q+'Chapter1-Part1-Intro',ch:[{pre:Q+'Chapter1-Part1-Scientist'},{pre:Q+'Chapter1-Part1-Militarist'}]},
+{id:'1ba',lab:'Chapter 1, part 2 (Anomalies)',x:1,y:0,who:'sc',intro:Q+'Chapter1-Part2A-Intro',ch:[{pre:Q+'Chapter1-Part2A-Scientist'},{pre:Q+'Chapter1-Part2A-Militarist'}]},
+{id:'1bb',lab:'Chapter 1, part 2 (Pirates)',x:1,y:2.4,who:'mi',intro:Q+'Chapter1-Part2B-Intro',ch:[{pre:Q+'Chapter1-Part2B-Militarist'},{pre:Q+'Chapter1-Part2B-Scientist'}]},
+{id:'2a',lab:'Chapter 2 (Anomalies)',x:2,y:0,who:'sc',intro:Q+'Chapter2A-Intro',ch:[{pre:Q+'Chapter2A-Scientist'},{pre:Q+'Chapter2A-Militarist'}]},
+{id:'2b',lab:'Chapter 2 (Pirates)',x:2,y:2.4,who:'mi',intro:Q+'Chapter2B-Intro',ch:[{pre:Q+'Chapter2B-Scientist'},{pre:Q+'Chapter2B-Militarist'}]},
+{id:'3a',lab:'Chapter 3, part 1',x:3,y:1.3,who:'sh',intro:Q+'Chapter3-Part1-Intro',ch:[{pre:Q+'Chapter3-Part1-Scientist'},{pre:Q+'Chapter3-Part1-Militarist'}]},
+{id:'3b',lab:'Chapter 3, part 2',x:4,y:1.3,who:'sh',intro:Q+'Chapter3-Part2-Intro',ch:[{pre:Q+'Chapter3-Part2-Scientist'},{pre:Q+'Chapter3-Part2-Militarist'}]},
+{id:'4m',lab:'Final chapter (Origins)',x:5,y:0,who:'mi',intro:Q+'Chapter4-Militarist-Part1-Intro',ch:[{pre:Q+'Chapter4-Militarist-Part1-Militarist'},{pre:Q+'Chapter4-Militarist-Part1-Scientist'}]},
+{id:'4s',lab:'Final chapter (Reunification)',x:5,y:2.4,who:'sc',intro:Q+'Chapter4-Science-Part1-Intro',ch:[{pre:Q+'Chapter4-Science-Part1-Scientist',rw:Q+'Chapter4-Science-Part1-ScienceReward'},{pre:Q+'Chapter4-Science-Part1-Militarist',rw:Q+'Chapter4-Science-Part1-MilitaristReward'}]},
+{id:'p15',lab:'Population quest 15',x:0,y:3.7,who:'sd',intro:'PopulationQuest15-Intro',ch:[{pre:'PopulationQuest15-Choice01'},{pre:'PopulationQuest15-Choice02'}],note:'Vaulters population quest: “Quick Learners”. Explore the Dust or the ancient craft of deposits.'},
+{id:'g11',lab:'Global quest 11 (Pirates)',x:2,y:3.7,who:'sd',intro:'GlobalQuest11-Compet01-Intro-',ch:[{pre:'GlobalQuest11-Compet01-'}],note:'Competitive quest: “Any Good Lair Has a Back Door”. Hunt down Fluffpetal Gurk’Zvar after the Pirate League falls.'}
+];
+const NM=Object.fromEntries(N.map(n=>[n.id,n]));
+const ED=[
+['1a','1ba','Seekers (Scientist) choice leads to studying anomalies.',1],
+['1a','1bb','Sentinels (Militarist) choice leads to confronting the nearby pirate lair.',1],
+['1ba','2a','Anomaly research leads into the Chapter 2A search for Auriga via planetary scans.'],
+['1bb','2b','Pirate interrogation leads into the Chapter 2B search for Auriga via scavenged space charts.'],
+['2a','3a','Finding the frozen, desolate Auriga triggers national mourning and the mysterious Heretic transmission from the Academy.'],
+['2b','3a','Finding the frozen, desolate Auriga triggers national mourning and the mysterious Heretic transmission from the Academy.'],
+['3a','3b','Investigating the Heretic leads to direct diplomatic contact with Isyander who holds Opbot.'],
+['3b','4m','Refusing to trade for Opbot (IGNORE) leads to confrontation with the Academy in Chapter 4: Origins.',1],
+['3b','4s','Ransom/rescuing Opbot (EXTRACT) leads to celebrating its return in Chapter 4: Reunification (Auriga 2.0).',1],
+['1bb','g11','Suppression of pirates links to the global downfall of the Pirate League.',1]
+];
+const CW=200,RH=76,NW=156,NH=62,PX=16,PY=14;
+const gk=k=>DK[k];
+function ititle(n){let t=gk(n.intro+'Title');if(t==null&&n.intro.endsWith('-'))t=gk(n.intro+'Title');return t}
+function label(n){const t=ititle(n);return t?t.replace(/^\s*(?:Chapter\s+\d+|Final Chapter)\s*[-.]\s*/,'').trim():n.lab}
+function chs(n){if(n.ch)return n.ch;return Object.keys(DK).filter(k=>k.startsWith(n.auto)&&/\d\dTitle$/.test(k)).sort().map(k=>({pre:k.slice(0,-5)}))}
+function buildMap(){const m=$('#map'),mx=Math.max(...N.map(n=>n.x)),my=Math.max(...N.map(n=>n.y)),w=mx*CW+NW+2*PX,h=my*RH+NH+2*PY;m.style.width=w+'px';m.style.height=h+'px';
+const pos=n=>({x:PX+n.x*CW,y:PY+n.y*RH});
+let s='<svg width="'+w+'" height="'+h+'">';
+ED.forEach((e,i)=>{const a=pos(NM[e[0]]),b=pos(NM[e[1]]),x1=a.x+NW,y1=a.y+NH/2,x2=b.x,y2=b.y+NH/2;
+s+='<path class="ed'+(e[3]?' w':'')+'" data-i="'+i+'" d="M'+x1+' '+y1+'C'+(x1+60)+' '+y1+','+(x2-60)+' '+y2+','+x2+' '+y2+'"><title>'+esc(e[2])+'</title></path>'});
+s+='</svg>';
+N.forEach(n=>{const p=pos(n);s+='<button class="nd" data-id="'+n.id+'" style="left:'+p.x+'px;top:'+p.y+'px;--c:'+W[n.who][1]+'" title="'+esc(label(n))+'"><small>'+n.lab+'</small><b>'+esc(label(n))+'</b></button>'});
+m.innerHTML=s;m.onclick=e=>{const b=e.target.closest('.nd');if(b)location.hash='n-'+b.dataset.id};
+$('#leg').innerHTML=Object.values(W).map(v=>'<span><i style="--c:'+v[1]+'"></i>'+v[0]+'</span>').join('')+'<span>Solid line: text supports it. Dashed: best reading.</span>'}
+function rel(id){const s=new Set([id]);const go=(i,a,b)=>ED.forEach(e=>{if(e[a]===i&&!s.has(e[b])){s.add(e[b]);go(e[b],a,b)}});go(id,1,0);go(id,0,1);return s}
+const FL=[['Description','Briefing',''],['Objective','Objective',''],['ObjectiveTooltip','Hint',''],['BisObjective','Alternative objective',''],['BisObjectiveTooltip','Alternative hint',''],['AltObjective','Alternative objective',''],['AltObjectiveTooltip','Alternative hint',''],['Outcome','If completed','ok'],['Outcome1','Outcome (Option 1)','ok'],['Outcome2','Outcome (Option 2)','ok'],['BisOutcome','If completed (alt)','ok']];
+function card(c,col){const t=gk(c.t||c.pre+'Choice')||gk(c.pre+'Title');let h='<div class="ch" style="--c:'+col+'"><h3>'+(t?pretty(t):'Objective')+'</h3>';
+FL.forEach(f=>{const v=gk(c.pre+f[0]);if(v!=null&&v.trim())h+='<div class="row '+f[2]+'"><span>'+f[1]+'</span>'+pretty(v)+'</div>'});
+if(c.rw&&gk(c.rw))h+='<div class="row"><span>Reward</span>'+pretty(gk(c.rw))+'</div>';
+return h+'</div>'}
+function show(id){const n=NM[id],c=W[n.who][1];
+document.querySelectorAll('.nd').forEach(b=>b.classList.toggle('sel',b.dataset.id===id));
+const r=rel(id);document.querySelectorAll('.nd').forEach(b=>b.classList.toggle('dim',!r.has(b.dataset.id)));
+document.querySelectorAll('.ed').forEach(p=>{const e=ED[p.dataset.i];p.classList.toggle('on',r.has(e[0])&&r.has(e[1]))});
+let h='<div class="kick" style="--c:'+c+'">'+n.lab+', '+W[n.who][0]+'</div><h2>'+pretty(ititle(n)||n.lab)+'</h2>'+para(gk(n.intro+'Description'));
+if(n.note)h+='<div class="note">'+esc(n.note)+'</div>';
+const cs=chs(n);
+if(cs.length>1)h+='<h4>Choose one</h4>';else h+='<h4>Objective</h4>';
+cs.forEach(x=>h+=card(x,c));
+const li=(a,i)=>ED.filter(e=>e[a]===id).map(e=>'<li><a href="#n-'+e[i]+'">'+NM[e[i]].lab+': '+esc(label(NM[e[i]]))+'</a><em>'+esc(e[2])+(e[3]?' (best reading)':'')+'</em></li>').join('');
+const ins=li(1,0),outs=li(0,1);
+if(ins)h+='<h4>Comes from</h4><ul class="lnk">'+ins+'</ul>';if(outs)h+='<h4>Leads to</h4><ul class="lnk">'+outs+'</ul>';
+const rw=SRC.filter(e=>e[1].includes(id));
+if(rw.length)h+='<h4>Likely reward</h4><ul class="lnk">'+rw.map(e=>'<li><a href="#rewards">'+esc(e[2])+'</a></li>').join('')+'</ul>';
+$('#det').innerHTML=h;$('#det').scrollTop=0;if(innerWidth<=1100&&!show.first)$('#det').scrollIntoView({behavior:'smooth'});show.first=0}
+show.first=1;
+/* likely sources */
+const SRC=[['StarSystemImprovementQuestVaulters05',['1ba','1bb'],'Underground Citadel'],['StarSystemImprovementQuestVaulters06',['2a','2b'],'Geological Vault'],
+['StarSystemImprovementQuestVaulters09',['3a','3b'],'Conscription Complex'],['EmpireImprovementQuestVaulters12',['4m','4s'],'Open Source Defense Systems'],
+['StarSystemImprovementUniqueStrategicVaulters',['4s'],'Filter Barges']];
+const ch=(...a)=>a.map(i=>'<a class="chip" href="#n-'+i+'">'+NM[i].lab+'</a>').join('');
+const LORE=[['People',[
+['Ilona Zolya','Chancellor of the Vaulters','Awoke from the Argosy to lead her kin in searching for Auriga and founding a new civilization.',['1a','2a','2b','3a','3b','4m','4s']],
+['Opbot 01','Virtual Endless Companion','The ancient companion machine who guided the Vaulters on Auriga. Mysteriously disappears in Chapter 1, reappears in the hands of Isyander’s Academy in Chapter 3.',['1a','1ba','1bb','3a','3b','4s']],
+['Isyander St. Shaiad','Leader of the Academy','The enigmatic leader of the Academy who holds Opbot and bargains for the Vaulters’ allegiance.',['3a','3b','4m','4s']],
+['Fluffpetal Gurk\x27Zvar','Pirate Leader','Belligerent leader of the Pirate League, flying the fearsome Hammerhead-class ship.',['g11']],
+['Petrov Jutka','Hero','Hero of the Vaulters, seasoned administrator and fleet tactician.',[]],
+['Serz Kersho','Hero','Veteran explorer dedicated to charting uncharted star systems for the Vaulters.',[]],
+['Justicar Jyde Parcha','Sisters of Mercy Hero','A holy knight of the Sisters of Mercy, providing divine guidance and discipline.',[]]]],
+['Factions and Ideologies',[
+['The Vaulters','Major Faction','Human survivors who escaped the frozen world of Auriga aboard the golden colony ship Argosy.',['1a','2a','3a','4m','4s']],
+['The Foundlings','Reunification Branch','Vaulters who embrace scientific knowledge, diplomacy, and peace after rescuing Opbot.',['4s']],
+['The Bereaved','Militarist Branch','Vaulters who choose vengeance and military resolve after discovering Auriga\x27s destruction.',['4s','4m']],
+['Sisters of Mercy','Minor Faction','Devout healers and martial sisters who accompanied the Vaulters across the stars.',[]],
+['The Pirate League','Hostile Coalition','Galactic pirates operating out of fortified lairs, opposing settled star systems.',['1bb','g11']]]],
+['Places & Relics',[
+['Auriga','Lost Homeworld','The legendary ancestral planet left behind millennia ago, found lifeless and cold in Chapter 2.',['2a','2b']],
+['Auriga 2.0','The Promised Land','The new sanctuary star system colonized in the final chapter to rebuild the civilization.',['4s']],
+['The Argosy','Golden Colony Ship','The colossal vessel that carried the sleeping Vaulters across the galaxy.',['1a','3b']],
+['The Great Orrery','Ancient Belief','The ancient clockwork belief that cosmic events follow a mechanical grand design.',['2a','4s']]]]];
+function lore(){$('#t-lore').innerHTML=LORE.map(g=>'<h2 class="sec">'+g[0]+'</h2><div class="cols">'+g[1].map(i=>'<div class="card"><h3>'+i[0]+'</h3><div class="tag">'+i[1]+'</div><p>'+i[2]+'</p>'+ch(...i[3])+'</div>').join('')+'</div>').join('')}
+function rewards(){let h='<div class="note">Rewards and improvements unlocked throughout the Vaulters storyline.</div>';
+const card2=(b,extra)=>'<div class="card"><h3>'+esc(DK[b+'Title'])+'</h3>'+(DK[b+'Description']?'<p>'+pretty(DK[b+'Description'])+'</p>':'')+(DK[b+'EffectOverride']?'<div class="eff">'+pretty(DK[b+'EffectOverride'])+'</div>':'')+(DK[b+'TooltipEffect']?'<div class="eff">'+pretty(DK[b+'TooltipEffect'])+'</div>':'')+(extra||'')+'</div>';
+const src=b=>{const s=SRC.find(x=>x[0]===b);return s?'<p>Likely source: '+ch(...s[1])+'</p>':''};
+h+='<h2 class="sec">Star system improvements</h2><div class="cols">'+['StarSystemImprovementQuestVaulters05','StarSystemImprovementQuestVaulters06','StarSystemImprovementQuestVaulters09','StarSystemImprovementUniqueStrategicVaulters'].map(b=>card2(b,src(b))).join('')+'</div>';
+h+='<h2 class="sec">Empire improvements</h2><div class="cols">'+['EmpireImprovementQuestVaulters12'].map(b=>card2(b,src(b))).join('')+'</div>';
+$('#t-rewards').innerHTML=h}
+const TB=[['map','Quest map'],['lore','Lore'],['rewards','Rewards'],['overview','Overview'],['browse','Browse by topic'],['raw','All strings']];
 $('#tabs').innerHTML=TB.map(t=>'<a href="#'+t[0]+'" data-t="'+t[0]+'">'+t[1]+'</a>').join('');
 function tab(t){TB.forEach(x=>$('#t-'+x[0]).hidden=x[0]!==t);document.querySelectorAll('#tabs a').forEach(a=>a.classList.toggle('on',a.dataset.t===t))}
 function route(){const h=location.hash.slice(1);
-if(h.startsWith('c-')&&C[+h.slice(2)]){tab('browse');showCat(+h.slice(2));window.scrollTo(0,0)}
+if(h.startsWith('n-')&&NM[h.slice(2)]){tab('map');show(h.slice(2))}
+else if(h.startsWith('c-')&&C[+h.slice(2)]){tab('browse');showCat(+h.slice(2));window.scrollTo(0,0)}
 else if(h==='browse'){tab('browse');showCat(cur)}
-else if(TB.some(t=>t[0]===h))tab(h);else tab('overview')}
-overview();raw();addEventListener('hashchange',route);route();
+else if(TB.some(t=>t[0]===h))tab(h);else{tab('map');if(!$('.nd.sel'))show('1a')}}
+buildMap();lore();rewards();overview();raw();addEventListener('hashchange',route);route();

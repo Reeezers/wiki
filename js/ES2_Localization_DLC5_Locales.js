@@ -53,11 +53,117 @@ $('#rawn').textContent=r.length+' of '+D.length+' strings'+(q?' match â€œ'+q+'â€
 $('#rawl').innerHTML=r.slice(0,rawLim).map(i=>rawRow(i,true)).join('')+(r.length>rawLim?'<button class="more" data-more="1">Show 300 more</button>':'')}
 $('#rawl').onclick=e=>{if(e.target.closest('.more')){rawLim+=300;raw();return}if(e.target.closest('a'))return;const r=e.target.closest('.rw');if(r)r.classList.toggle('open')};
 $('#q').oninput=()=>{rawLim=300;raw();if(location.hash!=='#raw')location.hash='raw'};
-const TB=[['overview','Overview'],['browse','Browse by topic'],['raw','All strings']];
+/* ===== Quest map (same layout as the DLC 2 wiki) ===== */
+const DK=Object.fromEntries(D.map(d=>[d[0],d[1]]));
+const para=s=>String(s||'').replace(/\\n/g,'\n').split('\n').filter(x=>x.trim()&&!/^\s*-{3,}\s*$/.test(x)||0).map(x=>'<p>'+pretty(x)+'</p>').join('');
+const W={dm:['Dark Matter questline','#8b5cf6'],ac:['Academy & Pirates','#b82738'],ex:['Endless & Lost lore','#12a594'],em:['Empire society','#d19a12']};
+const N=[
+{id:'c1',lab:'Chapter 1',x:0,y:0.8,who:'dm',pre:'chapter_1_strange_tidings'},
+{id:'c2',lab:'Chapter 2',x:1,y:0.8,who:'dm',pre:'chapter_2_weapon_without_a_target'},
+{id:'c3',lab:'Chapter 3',x:2,y:0.8,who:'dm',pre:'chapter_3_anomalous_data'},
+{id:'c4',lab:'Chapter 4',x:3,y:0.8,who:'dm',pre:'chapter_4_a_final_absolution',ch:[{pre:'chapter_4_a_final_absolution-Step2'}]},
+{id:'q_traitor',lab:'Thieves and Traitors',x:0,y:2.3,who:'ac',pre:'thieves_and_traitors'},
+{id:'q_enemy',lab:'A Common Enemy',x:1,y:2.3,who:'ac',pre:'visions_of_a_common_enemy'},
+{id:'q_incoming',lab:'Incoming!',x:2,y:2.3,who:'ac',pre:'incoming'},
+{id:'q_battle',lab:'Forged in Battle',x:3,y:2.3,who:'ac',pre:'a_hero_proven_in_battle'},
+{id:'q_past',lab:'Wisdom of the Past',x:0,y:3.8,who:'ex',pre:'wisdom_of_the_past'},
+{id:'q_death',lab:'Death Without a Corpse',x:1,y:3.8,who:'ex',pre:'death_without_a_corpse'},
+{id:'q_choir',lab:'A Galaxy Far Away',x:2,y:3.8,who:'ex',pre:'a_galaxy_far_far_away'},
+{id:'q_politics',lab:'Black & White Politics',x:3,y:3.8,who:'em',pre:'black_or_white_politics',ch:[{pre:'black_or_white_politics-Objective1',t:'black_or_white_politics-Objective1Title'},{pre:'black_or_white_politics-Objective2',t:'black_or_white_politics-Objective2Title'}]}
+];
+const NM=Object.fromEntries(N.map(n=>[n.id,n]));
+const ED=[
+['c1','c2','Gathering data from buried secrets reveals the existence of an Endless weapons system.'],
+['c2','c3','Scientific research decodes anomalous sensor data pointing to the weapons site.'],
+['c3','c4','Investigating the anomalous coordinates leads directly to the site where an Academy fleet intervenes.'],
+['q_traitor','c4','Rogue Academy elements opposing Isyander link directly to the Academy presence in Chapter 4.',1],
+['q_enemy','q_incoming','Tensions with the Autonomous Bastards Collective (ABC) escalate into an active system siege.',1],
+['q_incoming','q_battle','Pirate and mercenary hostilities lead to direct duels against enemy Hero ships.',1],
+['q_past','q_death','Archaeological research into Lost worship leads to retracing Lost warp movements.',1],
+['q_death','q_choir','Probing the void without starlanes uncovers cloaked entities of the Umbral Choir.',1]
+];
+const CW=200,RH=76,NW=156,NH=62,PX=16,PY=14;
+const gk=k=>DK[k];
+function ititle(n){return gk(n.pre+'-Title')||n.lab}
+function label(n){const t=ititle(n);return t?t.replace(/^\s*(?:Chapter\s+\d+:\s*)/,'').trim():n.lab}
+function buildMap(){const m=$('#map'),mx=Math.max(...N.map(n=>n.x)),my=Math.max(...N.map(n=>n.y)),w=mx*CW+NW+2*PX,h=my*RH+NH+2*PY;m.style.width=w+'px';m.style.height=h+'px';
+const pos=n=>({x:PX+n.x*CW,y:PY+n.y*RH});
+let s='<svg width="'+w+'" height="'+h+'">';
+ED.forEach((e,i)=>{const a=pos(NM[e[0]]),b=pos(NM[e[1]]),x1=a.x+NW,y1=a.y+NH/2,x2=b.x,y2=b.y+NH/2;
+s+='<path class="ed'+(e[3]?' w':'')+'" data-i="'+i+'" d="M'+x1+' '+y1+'C'+(x1+60)+' '+y1+','+(x2-60)+' '+y2+','+x2+' '+y2+'"><title>'+esc(e[2])+'</title></path>'});
+s+='</svg>';
+N.forEach(n=>{const p=pos(n);s+='<button class="nd" data-id="'+n.id+'" style="left:'+p.x+'px;top:'+p.y+'px;--c:'+W[n.who][1]+'" title="'+esc(label(n))+'"><small>'+n.lab+'</small><b>'+esc(label(n))+'</b></button>'});
+m.innerHTML=s;m.onclick=e=>{const b=e.target.closest('.nd');if(b)location.hash='n-'+b.dataset.id};
+$('#leg').innerHTML=Object.values(W).map(v=>'<span><i style="--c:'+v[1]+'"></i>'+v[0]+'</span>').join('')+'<span>Solid line: text supports it. Dashed: best reading.</span>'}
+function rel(id){const s=new Set([id]);const go=(i,a,b)=>ED.forEach(e=>{if(e[a]===i&&!s.has(e[b])){s.add(e[b]);go(e[b],a,b)}});go(id,1,0);go(id,0,1);return s}
+function show(id){const n=NM[id],c=W[n.who][1];
+document.querySelectorAll('.nd').forEach(b=>b.classList.toggle('sel',b.dataset.id===id));
+const r=rel(id);document.querySelectorAll('.nd').forEach(b=>b.classList.toggle('dim',!r.has(b.dataset.id)));
+document.querySelectorAll('.ed').forEach(p=>{const e=ED[p.dataset.i];p.classList.toggle('on',r.has(e[0])&&r.has(e[1]))});
+let h='<div class="kick" style="--c:'+c+'">'+n.lab+', '+W[n.who][0]+'</div><h2>'+pretty(ititle(n))+'</h2>'+para(gk(n.pre+'-Description'));
+if(n.note)h+='<div class="note">'+esc(n.note)+'</div>';
+h+='<h4>Objective</h4>';
+const objT=gk(n.pre+'-ObjectiveTitle');
+h+='<div class="ch" style="--c:'+c+'"><h3>'+(objT?pretty(objT):'Mission')+'</h3>';
+const obj=gk(n.pre+'-Objective')||gk(n.pre+'-Objective-Description');
+if(obj)h+='<div class="row"><span>Objective</span>'+pretty(obj)+'</div>';
+const hint=gk(n.pre+'-ObjectiveTooltip');
+if(hint)h+='<div class="row"><span>Hint</span>'+pretty(hint)+'</div>';
+const out=gk(n.pre+'-Outcome');
+if(out)h+='<div class="row ok"><span>Outcome</span>'+pretty(out)+'</div>';
+const outF=gk(n.pre+'-OutcomeFailed');
+if(outF)h+='<div class="row bad"><span>If failed</span>'+pretty(outF)+'</div>';
+const rw=gk(n.pre+'-Reward')||gk(n.pre+'_Reward');
+if(rw)h+='<div class="row"><span>Reward</span>'+pretty(rw)+'</div>';
+h+='</div>';
+if(n.ch){n.ch.forEach(sub=>{
+const st=gk(sub.t||sub.pre+'Title');
+h+='<div class="ch" style="--c:'+c+'"><h3>'+(st?pretty(st):'Stage')+'</h3>';
+const sd=gk(sub.pre+'Description')||gk(sub.pre);
+if(sd)h+='<div class="row"><span>Details</span>'+pretty(sd)+'</div>';
+const stt=gk(sub.pre+'Tooltip');
+if(stt)h+='<div class="row"><span>Hint</span>'+pretty(stt)+'</div>';
+h+='</div>';
+});}
+const li=(a,i)=>ED.filter(e=>e[a]===id).map(e=>'<li><a href="#n-'+e[i]+'">'+NM[e[i]].lab+': '+esc(label(NM[e[i]]))+'</a><em>'+esc(e[2])+(e[3]?' (best reading)':'')+'</em></li>').join('');
+const ins=li(1,0),outs=li(0,1);
+if(ins)h+='<h4>Comes from</h4><ul class="lnk">'+ins+'</ul>';if(outs)h+='<h4>Leads to</h4><ul class="lnk">'+outs+'</ul>';
+const rws=SRC.filter(e=>e[1].includes(id));
+if(rws.length)h+='<h4>Likely reward</h4><ul class="lnk">'+rws.map(e=>'<li><a href="#rewards">'+esc(e[2])+'</a></li>').join('')+'</ul>';
+$('#det').innerHTML=h;$('#det').scrollTop=0;if(innerWidth<=1100&&!show.first)$('#det').scrollIntoView({behavior:'smooth'});show.first=0}
+show.first=1;
+/* likely sources */
+const SRC=[['chapter_4_a_final_absolution-Reward',['c4'],'Tier 3 Random Technology'],['thieves_and_traitors-Reward',['q_traitor'],'Academy Vessel'],
+['wisdom_of_the_past_Reward',['q_past'],'Nakalim Vessel'],['a_galaxy_far_far_away-Reward',['q_choir'],'Umbral Choir Vessel'],
+['black_or_white_politics_Reward',['q_politics'],'Random Technology']];
+const ch=(...a)=>a.map(i=>'<a class="chip" href="#n-'+i+'">'+NM[i].lab+'</a>').join('');
+const LORE=[['People & Heroes',[
+['Sbejru Mashmir','Pug Hero','Seventh pup of the seventh generation of seven-pup litters. Fierce, faithful, and dedicated to duty.',[]],
+['Isyander St. Shaiad','Leader of the Academy','His grand plans face internal rebellion from rogue Heroes in Thieves and Traitors and an intervention at the weapon site in Chapter 4.',['c4','q_traitor']]]],
+['Factions & Organizations',[
+['Autonomous Bastards Collective','Pirate Cartel','A proud proponent of piracy and chaos across known starlanes, requiring unified imperial defense.',['q_enemy','q_incoming']],
+['Academy Traitors','Rebel Heroes','A rogue faction of heroes breaking away from Isyander\x27s authority.',['q_traitor']],
+['The Lost','Extinct Precursors','Cosmic beings whose genocide by the Endless left profound scars and remnants across deep space.',['q_past','q_death']],
+['The Umbral Choir','Cloaked Spectres','Incorporeal beings observed only through advanced optics and singularity sensors.',['q_choir']]]],
+['The Endless Superweapon',[
+['Buried Relics','Chapter 1 Investigation','Ancient curiosities strewn across constellations that whisper of an unknown catastrophic device.',['c1']],
+['Weapons System Analysis','Chapter 2 Research','Deconstructing the physics of an Endless weapon designed without an apparent enemy.',['c2']],
+['The Lair Coordinates','Chapter 3 Reconnaissance','Anomalous gravitational signatures leading to the weapon\x27s deployment cradle.',['c3']],
+['The Final Absolution','Chapter 4 Climax','The showdown between imperial explorers and the Academy fleet over the fate of the weapon.',['c4']]]]];
+function lore(){$('#t-lore').innerHTML=LORE.map(g=>'<h2 class="sec">'+g[0]+'</h2><div class="cols">'+g[1].map(i=>'<div class="card"><h3>'+i[0]+'</h3><div class="tag">'+i[1]+'</div><p>'+i[2]+'</p>'+ch(...i[3])+'</div>').join('')+'</div>').join('')}
+function rewards(){let h='<div class="note">'+esc(DK.DLCDarkMatterTitle)+': '+pretty(DK.DLCDarkMatterDescription)+'</div>';
+h+='<h2 class="sec">Quest Rewards & Fleet Gifts</h2><div class="cols">';
+SRC.forEach(([k,nids,title])=>{
+h+='<div class="card"><h3>'+esc(title)+'</h3><p>Awarded from '+ch(...nids)+'</p><p>'+pretty(DK[k]||'')+'</p></div>';
+});
+h+='</div>';
+$('#t-rewards').innerHTML=h}
+const TB=[['map','Quest map'],['lore','Lore'],['rewards','Rewards'],['overview','Overview'],['browse','Browse by topic'],['raw','All strings']];
 $('#tabs').innerHTML=TB.map(t=>'<a href="#'+t[0]+'" data-t="'+t[0]+'">'+t[1]+'</a>').join('');
 function tab(t){TB.forEach(x=>$('#t-'+x[0]).hidden=x[0]!==t);document.querySelectorAll('#tabs a').forEach(a=>a.classList.toggle('on',a.dataset.t===t))}
 function route(){const h=location.hash.slice(1);
-if(h.startsWith('c-')&&C[+h.slice(2)]){tab('browse');showCat(+h.slice(2));window.scrollTo(0,0)}
+if(h.startsWith('n-')&&NM[h.slice(2)]){tab('map');show(h.slice(2))}
+else if(h.startsWith('c-')&&C[+h.slice(2)]){tab('browse');showCat(+h.slice(2));window.scrollTo(0,0)}
 else if(h==='browse'){tab('browse');showCat(cur)}
-else if(TB.some(t=>t[0]===h))tab(h);else tab('overview')}
-overview();raw();addEventListener('hashchange',route);route();
+else if(TB.some(t=>t[0]===h))tab(h);else{tab('map');if(!$('.nd.sel'))show('c1')}}
+buildMap();lore();rewards();overview();raw();addEventListener('hashchange',route);route();
