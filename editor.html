@@ -1,0 +1,1291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Endless Space 2 Wiki Content Editor</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    /* Editor Layout Styles */
+    :root {
+      --ed-bg: #ece9d8;
+      --ed-panel: #ffffff;
+      --ed-border: #7f9db9;
+      --ed-highlight: #316ac5;
+    }
+    body {
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      overflow: hidden;
+      background: var(--bg);
+    }
+    .top-header {
+      padding: 6px 12px;
+      background: #000080;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+      border-bottom: 2px solid #404040;
+    }
+    .top-header h1 {
+      font-size: 15px;
+      padding: 0;
+      margin: 0;
+      background: none;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .header-links {
+      display: flex;
+      gap: 6px;
+      margin-left: auto;
+      align-items: center;
+    }
+    .btn-win {
+      font: inherit;
+      font-size: 12px;
+      padding: 3px 10px;
+      background: var(--bg);
+      color: #000;
+      border: 2px solid;
+      border-color: #fff #404040 #404040 #fff;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .btn-win:active {
+      border-color: #404040 #fff #fff #404040;
+      padding: 4px 9px 2px 11px;
+    }
+    .btn-win:disabled {
+      color: #808080;
+      cursor: not-allowed;
+      border-color: #fff #808080 #808080 #fff;
+    }
+    .btn-save {
+      background: #006000;
+      color: #fff;
+      font-weight: bold;
+      border-color: #40a040 #003000 #003000 #40a040;
+    }
+    .btn-save:hover { background: #007500; }
+    .btn-save:disabled { background: #557555; color: #ccc; }
+    .auth-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 3px 8px;
+      font-size: 11px;
+      font-weight: bold;
+      border: 2px solid;
+    }
+    .auth-badge.locked {
+      background: #c00000;
+      color: #fff;
+      border-color: #ff6060 #600000 #600000 #ff6060;
+      cursor: pointer;
+    }
+    .auth-badge.unlocked {
+      background: #008000;
+      color: #fff;
+      border-color: #60ff60 #004000 #004000 #60ff60;
+    }
+    .git-badge {
+      font-size: 11px;
+      background: #2a3a5a;
+      color: #cce0ff;
+      padding: 3px 8px;
+      border: 1px solid #1a2540;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    /* Toolbar */
+    .toolbar {
+      padding: 6px 12px;
+      background: var(--bg);
+      border-bottom: 2px solid;
+      border-color: #fff #404040 #404040 #fff;
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    .toolbar select, .toolbar input[type="search"] {
+      font: inherit;
+      padding: 3px 6px;
+      border: 2px solid;
+      border-color: #404040 #fff #fff #404040;
+      background: #fff;
+    }
+    .toolbar label {
+      font-size: 12px;
+      font-weight: bold;
+    }
+    .stat-text {
+      margin-left: auto;
+      font-size: 12px;
+      color: var(--mut);
+    }
+
+    /* Server status banner */
+    #server-banner {
+      padding: 4px 12px;
+      font-size: 12px;
+      background: #ffffe1;
+      border-bottom: 1px solid #808080;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    #server-banner.offline {
+      background: #ffe1e1;
+      color: #a00000;
+    }
+    #server-banner.online {
+      background: #e1ffe1;
+      color: #006000;
+    }
+
+    /* Main Container */
+    .editor-container {
+      display: grid;
+      grid-template-columns: 460px 1fr;
+      flex: 1;
+      min-height: 0;
+      overflow: hidden;
+      background: var(--bg);
+    }
+    @media (max-width: 900px) {
+      .editor-container {
+        grid-template-columns: 1fr;
+        grid-template-rows: 1fr 1fr;
+      }
+    }
+
+    /* Strings List Panel */
+    .list-panel {
+      display: flex;
+      flex-direction: column;
+      border-right: 2px solid;
+      border-color: #fff #404040 #404040 #fff;
+      min-height: 0;
+      background: #fff;
+    }
+    .list-header {
+      padding: 6px 8px;
+      background: var(--bg);
+      border-bottom: 2px solid;
+      border-color: #fff #404040 #404040 #fff;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-weight: bold;
+      font-size: 12px;
+    }
+    .strings-list {
+      flex: 1;
+      overflow-y: auto;
+      padding: 0;
+      margin: 0;
+      list-style: none;
+    }
+    .string-item {
+      padding: 6px 8px;
+      border-bottom: 1px solid #d0d0d0;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+    .string-item:hover {
+      background: #f0f4ff;
+    }
+    .string-item.active {
+      background: #000080;
+      color: #fff;
+    }
+    .string-item.active .str-key, .string-item.active .str-cat {
+      color: #fff;
+    }
+    .string-item.active .str-preview {
+      color: #e0e0e0;
+    }
+    .str-row-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 6px;
+    }
+    .str-key {
+      font-family: Consolas, monospace;
+      font-size: 12px;
+      font-weight: bold;
+      color: #000080;
+      word-break: break-all;
+    }
+    .str-cat {
+      font-size: 10px;
+      background: #e8e8e8;
+      color: #333;
+      padding: 1px 4px;
+      border: 1px solid #aaa;
+      white-space: nowrap;
+    }
+    .string-item.active .str-cat {
+      background: #334499;
+      color: #fff;
+      border-color: #fff;
+    }
+    .str-preview {
+      font-size: 11px;
+      color: #555;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      line-height: 1.3;
+    }
+    .str-dirty {
+      display: inline-block;
+      width: 8px;
+      height: 8px;
+      background: #ff9900;
+      border-radius: 50%;
+      margin-right: 4px;
+    }
+    .pagination {
+      padding: 4px 8px;
+      background: var(--bg);
+      border-top: 2px solid;
+      border-color: #fff #404040 #404040 #fff;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 11px;
+    }
+
+    /* Inspector & Editor Panel */
+    .inspector-panel {
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+      overflow-y: auto;
+      padding: 12px;
+      gap: 12px;
+      background: var(--bg);
+    }
+    .edit-box {
+      background: #fff;
+      border: 2px solid;
+      border-color: #404040 #fff #fff #404040;
+      padding: 10px;
+    }
+    .field-group {
+      margin-bottom: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .field-group label {
+      font-size: 11px;
+      font-weight: bold;
+      color: var(--mut);
+      text-transform: uppercase;
+    }
+    .field-group input, .field-group textarea {
+      font: inherit;
+      padding: 5px;
+      border: 2px solid;
+      border-color: #404040 #fff #fff #404040;
+      background: #fff;
+    }
+    .field-group input:disabled, .field-group textarea:disabled {
+      background: #f0f0f0;
+      color: #666;
+    }
+    .field-group textarea {
+      font-family: Consolas, monospace;
+      font-size: 13px;
+      line-height: 1.4;
+      resize: vertical;
+      min-height: 120px;
+    }
+
+    /* ES2 Token Quick-Insert Bar */
+    .token-bar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+      margin: 4px 0 8px;
+      padding: 4px;
+      background: #f5f5f5;
+      border: 1px solid #ccc;
+    }
+    .token-bar button {
+      font-size: 11px;
+      padding: 2px 6px;
+      background: #fff;
+      border: 1px solid #999;
+      cursor: pointer;
+    }
+    .token-bar button:hover {
+      background: #e0ebff;
+      border-color: #000080;
+    }
+
+    /* Game Live Preview */
+    .preview-card {
+      background: #ffffe1;
+      border: 1px solid #000;
+      padding: 10px;
+      margin-top: 4px;
+      min-height: 60px;
+      font-size: 13px;
+      line-height: 1.4;
+      white-space: pre-wrap;
+    }
+
+    /* Security Modal */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.6);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+    }
+    .modal-box {
+      background: var(--bg);
+      border: 2px solid;
+      border-color: #fff #404040 #404040 #fff;
+      box-shadow: 4px 4px 0 #000;
+      width: 440px;
+      max-width: 90vw;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+    }
+    .modal-title {
+      background: #000080;
+      color: #fff;
+      padding: 4px 8px;
+      font-size: 14px;
+      font-weight: bold;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .modal-body {
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .modal-footer {
+      padding: 8px 14px;
+      background: #d8d8d8;
+      border-top: 1px solid #808080;
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+    }
+    .error-msg {
+      background: #ffe0e0;
+      border: 1px solid #cc0000;
+      color: #990000;
+      padding: 6px 8px;
+      font-size: 12px;
+      font-weight: bold;
+    }
+    .success-msg {
+      background: #e0ffe0;
+      border: 1px solid #008800;
+      color: #006600;
+      padding: 6px 8px;
+      font-size: 12px;
+      font-weight: bold;
+    }
+
+    /* Toast Notification */
+    #toast {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: #000080;
+      color: #fff;
+      padding: 10px 16px;
+      border: 2px solid #fff;
+      box-shadow: 2px 2px 8px rgba(0,0,0,0.4);
+      font-size: 13px;
+      z-index: 9999;
+      display: none;
+      max-width: 400px;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Header -->
+  <header class="top-header">
+    <h1><span>✏️ Endless Space 2 Wiki Content Editor</span></h1>
+    <div class="header-links">
+      <div id="auth-status" class="auth-badge locked" onclick="openAuthModal()" title="Click to Enter Password">
+        <span>🔒 Locked (Key in Password to Edit)</span>
+      </div>
+      <button id="lock-btn" class="btn-win" style="display:none;" onclick="lockEditor()">🔒 Lock</button>
+      <div id="git-status-badge" class="git-badge" title="Git Repository Status">
+        <span>Git: <b id="git-branch">main</b> (<span id="git-hash">...</span>)</span>
+      </div>
+      <a class="btn-win" href="index.html">&laquo; Back to Wiki</a>
+    </div>
+  </header>
+
+  <!-- Server connection banner -->
+  <div id="server-banner" class="online">
+    <span id="banner-text">Connecting to Git save server on port 8000...</span>
+  </div>
+
+  <!-- Toolbar -->
+  <div class="toolbar">
+    <label for="file-select">File:</label>
+    <select id="file-select" onchange="loadFile(this.value)">
+      <option value="">Loading file list...</option>
+    </select>
+
+    <label for="topic-select">Topic:</label>
+    <select id="topic-select" onchange="filterStrings()">
+      <option value="">All Topics</option>
+    </select>
+
+    <input id="search-input" type="search" placeholder="Search by key, text, or tokens..." oninput="filterStrings()">
+
+    <button id="btn-add" class="btn-win" onclick="openAddModal()">➕ Add String</button>
+    <button id="btn-replace" class="btn-win" onclick="openReplaceModal()">🔍 Find &amp; Replace</button>
+    <button id="btn-save-all" class="btn-win btn-save" onclick="saveAllChanges()">💾 Save to Repository</button>
+
+    <span id="filter-count" class="stat-text">Loading...</span>
+  </div>
+
+  <!-- Main Split Editor Container -->
+  <div class="editor-container">
+
+    <!-- Left Panel: Strings List -->
+    <div class="list-panel">
+      <div class="list-header">
+        <span>Localization Strings</span>
+        <span id="list-total-badge" style="font-size:11px; color:#555;">0 items</span>
+      </div>
+      <ul class="strings-list" id="strings-list"></ul>
+      <div class="pagination">
+        <button id="btn-prev" class="btn-win" onclick="changePage(-1)">&laquo; Prev</button>
+        <span id="page-info">Page 1 of 1</span>
+        <button id="btn-next" class="btn-win" onclick="changePage(1)">Next &raquo;</button>
+      </div>
+    </div>
+
+    <!-- Right Panel: String Inspector & Live Editor -->
+    <div class="inspector-panel" id="inspector-panel">
+      <div class="edit-box">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+          <h2 style="font-size:14px; margin:0;" id="inspector-title">Select a string to edit</h2>
+          <div style="display:flex; gap:6px;">
+            <button id="btn-delete" class="btn-win" style="color:#c00000;" onclick="deleteActiveString()" disabled>🗑️ Delete</button>
+          </div>
+        </div>
+
+        <div class="field-group">
+          <label for="inp-key">String Key (Localization Identifier):</label>
+          <input type="text" id="inp-key" placeholder="%KeyName" disabled>
+        </div>
+
+        <div class="field-group">
+          <label for="inp-category">Topic / Category:</label>
+          <input type="text" id="inp-category" list="cat-datalist" placeholder="Category Name" disabled>
+          <datalist id="cat-datalist"></datalist>
+        </div>
+
+        <div class="field-group">
+          <label for="inp-value">String Text (English Localization):</label>
+          <div class="token-bar" id="token-bar">
+            <span style="font-size:11px; font-weight:bold; align-self:center; margin-right:4px;">Insert Game Token:</span>
+            <button type="button" onclick="insertToken('[dust]')">[dust]</button>
+            <button type="button" onclick="insertToken('[science]')">[science]</button>
+            <button type="button" onclick="insertToken('[industry]')">[industry]</button>
+            <button type="button" onclick="insertToken('[food]')">[food]</button>
+            <button type="button" onclick="insertToken('[manpower]')">[manpower]</button>
+            <button type="button" onclick="insertToken('[prestige]')">[prestige]</button>
+            <button type="button" onclick="insertToken('[turn]')">[turn]</button>
+            <button type="button" onclick="insertToken('[population]')">[population]</button>
+            <button type="button" onclick="insertToken('[fids]')">[fids]</button>
+            <button type="button" onclick="insertToken('$Amount01Name')">$Amount01Name</button>
+            <button type="button" onclick="insertToken('$Timer')">$Timer</button>
+            <button type="button" onclick="insertToken('#E3BDAC#', '#REVERT#')">#Color#</button>
+            <button type="button" onclick="insertToken('\\n')">\\n (Linebreak)</button>
+          </div>
+          <textarea id="inp-value" rows="6" placeholder="Key in localization text..." oninput="onValueInput()" disabled></textarea>
+          <div style="display:flex; justify-content:space-between; font-size:11px; color:#555;">
+            <span id="char-count">0 characters</span>
+            <span>Formatted for Endless Space 2 localization</span>
+          </div>
+        </div>
+
+        <div class="field-group">
+          <label>Live Game / Wiki Preview:</label>
+          <div class="preview-card" id="live-preview">(Preview will appear here)</div>
+        </div>
+
+        <div style="display:flex; justify-content:flex-end; gap:8px; margin-top:12px;">
+          <button id="btn-revert" class="btn-win" onclick="revertActiveString()" disabled>↺ Revert</button>
+          <button id="btn-save-single" class="btn-win btn-save" onclick="saveActiveString()" disabled>💾 Save &amp; Commit to Repository</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Security Authentication Modal -->
+  <div id="auth-modal" class="modal-overlay" style="display:none;">
+    <div class="modal-box">
+      <div class="modal-title">
+        <span>🔒 Security Verification Required</span>
+        <button class="btn-win" style="padding:1px 5px;" onclick="closeAuthModal()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p style="margin:0; font-size:12px;">To ensure security, editing content and committing changes to the repository requires password verification.</p>
+        <div id="auth-error" class="error-msg" style="display:none;"></div>
+        <div class="field-group">
+          <label for="auth-password-input">Key in Password:</label>
+          <div style="display:flex; gap:4px;">
+            <input type="password" id="auth-password-input" placeholder="Enter password to unlock editor..." style="flex:1;">
+            <button type="button" class="btn-win" onclick="togglePasswordVisibility()">👁️</button>
+          </div>
+        </div>
+        <p style="font-size:11px; color:#555; margin:0;">Changes made in this editor are immediately saved and committed to the Git repository.</p>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-win" onclick="closeAuthModal()">Cancel (Read-Only)</button>
+        <button class="btn-win btn-save" onclick="submitAuth()">🔓 Unlock Editor</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add String Modal -->
+  <div id="add-modal" class="modal-overlay" style="display:none;">
+    <div class="modal-box" style="width:520px;">
+      <div class="modal-title">
+        <span>➕ Add New Localization String</span>
+        <button class="btn-win" style="padding:1px 5px;" onclick="closeAddModal()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div id="add-error" class="error-msg" style="display:none;"></div>
+        <div class="field-group">
+          <label for="new-key">String Key (e.g. MyNewQuestTitle):</label>
+          <input type="text" id="new-key" placeholder="Must be unique">
+        </div>
+        <div class="field-group">
+          <label for="new-category">Topic / Category:</label>
+          <input type="text" id="new-category" list="cat-datalist" placeholder="Select or type new topic">
+        </div>
+        <div class="field-group">
+          <label for="new-value">Text Content:</label>
+          <textarea id="new-value" rows="4" placeholder="Text for this string..."></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-win" onclick="closeAddModal()">Cancel</button>
+        <button class="btn-win btn-save" onclick="submitAddString()">Add &amp; Commit to Repository</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Find & Replace Modal -->
+  <div id="replace-modal" class="modal-overlay" style="display:none;">
+    <div class="modal-box" style="width:480px;">
+      <div class="modal-title">
+        <span>🔍 Find &amp; Replace across Strings</span>
+        <button class="btn-win" style="padding:1px 5px;" onclick="closeReplaceModal()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="field-group">
+          <label for="find-query">Find Text:</label>
+          <input type="text" id="find-query" placeholder="Text to search for...">
+        </div>
+        <div class="field-group">
+          <label for="replace-query">Replace With:</label>
+          <input type="text" id="replace-query" placeholder="Replacement text...">
+        </div>
+        <div style="display:flex; gap:12px; font-size:12px;">
+          <label><input type="checkbox" id="match-case"> Match case</label>
+          <label><input type="checkbox" id="scope-topic"> Current topic only</label>
+        </div>
+        <div id="replace-preview-count" style="font-size:12px; font-weight:bold; color:#000080;"></div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-win" onclick="closeReplaceModal()">Cancel</button>
+        <button class="btn-win btn-save" onclick="submitBatchReplace()">Replace All &amp; Commit</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification -->
+  <div id="toast">Notification text</div>
+
+  <script>
+    // --- Configuration & Security ---
+    const REQUIRED_PASSWORD = "17ExTra";
+    let isAuthenticated = false;
+    let editorPassword = "";
+
+    // State
+    let fileList = [];
+    let currentFileName = "";
+    let currentData = { strings: [], categories: [] };
+    let filteredIndices = [];
+    let activeStringIndex = -1;
+    let originalStringSnapshot = null;
+    let dirtyCount = 0;
+
+    // Pagination
+    let currentPage = 1;
+    const PAGE_SIZE = 60;
+
+    // ES2 Pretty renderer
+    const esc = s => String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    const cap = w => {
+      w = String(w).replace(/([a-z])([A-Z])/g, '$1 $2').replace(/([A-Za-z])(\d)/g, '$1 $2').replace(/(\d)([A-Za-z])/g, '$1 $2').replace(/[_-]+/g, ' ').trim();
+      return w ? w[0].toUpperCase() + w.slice(1) : w;
+    };
+    function pretty(s) {
+      return esc(String(s || '').replace(/\\n/g, '\n'))
+        .replace(/#[0-9a-fA-F]{6}#([\s\S]*?)#REVERT#/g, '$1')
+        .replace(/#[0-9a-fA-F]{6}#/g, '')
+        .replace(/#REVERT#/g, '')
+        .replace(/\$Amount0?(\d+)Name/g, '<i class="tok">N<sub>$1</sub></i>')
+        .replace(/\$Timer/g, '<i class="tok">T</i>')
+        .replace(/\$([A-Za-z]\w*)/g, (m, w) => '<i class="tok">' + esc(cap(w.replace(/Name$/, '') || w)) + '</i>')
+        .replace(/\[turn\]/g, 'turns')
+        .replace(/\[(?:Strat\d+)?([\w-]+?)(?:Colored)?\]/g, (m, w) => '<b class="kw">' + esc(cap(w)) + '</b>');
+    }
+
+    // --- Toast ---
+    let toastTimer = null;
+    function showToast(msg, isError = false) {
+      const t = document.getElementById('toast');
+      t.textContent = msg;
+      t.style.background = isError ? '#a00000' : '#000080';
+      t.style.display = 'block';
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => { t.style.display = 'none'; }, 4000);
+    }
+
+    // --- Authentication & Security Flow ---
+    function checkStoredAuth() {
+      const stored = sessionStorage.getItem('wiki_editor_password');
+      if (stored === REQUIRED_PASSWORD) {
+        setAuthenticated(stored);
+      } else {
+        setLocked();
+      }
+    }
+
+    function setAuthenticated(pwd) {
+      isAuthenticated = true;
+      editorPassword = pwd;
+      sessionStorage.setItem('wiki_editor_password', pwd);
+
+      const statusEl = document.getElementById('auth-status');
+      statusEl.className = 'auth-badge unlocked';
+      statusEl.innerHTML = '<span>🔓 Editor Authenticated (17ExTra)</span>';
+      statusEl.onclick = null;
+      document.getElementById('lock-btn').style.display = 'inline-block';
+
+      // Unlock UI elements
+      document.getElementById('btn-add').disabled = false;
+      document.getElementById('btn-replace').disabled = false;
+      document.getElementById('btn-save-all').disabled = false;
+      if (activeStringIndex >= 0) {
+        enableInspector(true);
+      }
+      showToast("✅ Authenticated as Editor. Editing and Git commits unlocked.");
+    }
+
+    function setLocked() {
+      isAuthenticated = false;
+      editorPassword = "";
+      sessionStorage.removeItem('wiki_editor_password');
+
+      const statusEl = document.getElementById('auth-status');
+      statusEl.className = 'auth-badge locked';
+      statusEl.innerHTML = '<span>🔒 Locked (Key in Password to Edit)</span>';
+      statusEl.onclick = openAuthModal;
+      document.getElementById('lock-btn').style.display = 'none';
+
+      // Disable editing UI
+      document.getElementById('btn-add').disabled = true;
+      document.getElementById('btn-replace').disabled = true;
+      document.getElementById('btn-save-all').disabled = true;
+      enableInspector(false);
+    }
+
+    function lockEditor() {
+      setLocked();
+      showToast("🔒 Editor locked. Read-only mode active.");
+    }
+
+    function openAuthModal() {
+      document.getElementById('auth-error').style.display = 'none';
+      document.getElementById('auth-password-input').value = '';
+      document.getElementById('auth-modal').style.display = 'flex';
+      setTimeout(() => document.getElementById('auth-password-input').focus(), 100);
+    }
+
+    function closeAuthModal() {
+      document.getElementById('auth-modal').style.display = 'none';
+    }
+
+    function togglePasswordVisibility() {
+      const inp = document.getElementById('auth-password-input');
+      inp.type = inp.type === 'password' ? 'text' : 'password';
+    }
+
+    async function submitAuth() {
+      const pwd = document.getElementById('auth-password-input').value.trim();
+      const errEl = document.getElementById('auth-error');
+
+      if (!pwd) {
+        errEl.textContent = "Please enter the password.";
+        errEl.style.display = 'block';
+        return;
+      }
+
+      // Check with backend or client verification
+      try {
+        const res = await fetch('/api/auth', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ password: pwd })
+        });
+        const data = await res.json();
+        if (res.ok && data.success) {
+          closeAuthModal();
+          setAuthenticated(pwd);
+          return;
+        }
+      } catch (e) {
+        // Fallback for direct offline / static client
+        if (pwd === REQUIRED_PASSWORD) {
+          closeAuthModal();
+          setAuthenticated(pwd);
+          return;
+        }
+      }
+
+      errEl.textContent = "❌ Incorrect password. Access denied. To edit, you must key in: 17ExTra";
+      errEl.style.display = 'block';
+    }
+
+    document.getElementById('auth-password-input').addEventListener('keydown', e => {
+      if (e.key === 'Enter') submitAuth();
+    });
+
+    // --- API Calls & Git Status ---
+    async function updateGitStatus() {
+      try {
+        const res = await fetch('/api/git-status');
+        if (res.ok) {
+          const data = await res.json();
+          document.getElementById('git-branch').textContent = data.branch || 'main';
+          document.getElementById('git-hash').textContent = data.latest ? data.latest.hash : 'HEAD';
+          document.getElementById('git-status-badge').title = data.latest ? `${data.latest.message} (${data.latest.relativeTime})` : 'Git active';
+        }
+      } catch (e) {
+        document.getElementById('git-hash').textContent = 'offline';
+      }
+    }
+
+    async function checkServer() {
+      const banner = document.getElementById('server-banner');
+      const bText = document.getElementById('banner-text');
+      try {
+        const res = await fetch('/api/git-status');
+        if (res.ok) {
+          banner.className = 'online';
+          bText.innerHTML = '✅ <b>Git Save Server Connected (Port 8000)</b>: Changes made in the editor are immediately committed to the repository.';
+          return true;
+        }
+      } catch (e) {
+        banner.className = 'offline';
+        bText.innerHTML = '⚠️ <b>Git Save Server is offline at localhost:8000</b>. Run <code>run_editor.bat</code> or <code>python server.py</code> to enable automatic Git repository commits.';
+        return false;
+      }
+    }
+
+    // --- File Loading ---
+    async function loadFileList() {
+      try {
+        const res = await fetch('/api/files');
+        if (res.ok) {
+          fileList = await res.json();
+          populateFileDropdown();
+          return;
+        }
+      } catch (e) {}
+
+      // Fallback list of 16 files
+      fileList = [
+        { id: "2025Patch", filename: "ES2_Localization_2025Patch_Locales.js", title: "2025 Patch wiki", stringCount: 354 },
+        { id: "2023Patch", filename: "ES2_Localization_2023Patch_Locales.js", title: "2023 Patch wiki + feature map", stringCount: 476 },
+        { id: "Base", filename: "ES2_Localization_Locales.js", title: "Base Game wiki", stringCount: 8132 },
+        { id: "Quests", filename: "ES2_Localization_Quest_Locales.js", title: "Quests wiki", stringCount: 2465 },
+        { id: "Assets", filename: "ES2_Localization_Assets_Locales.js", title: "Assets wiki", stringCount: 6990 },
+        { id: "DLC2", filename: "ES2_Localization_DLC2_Locales.js", title: "Supremacy (DLC 2) wiki", stringCount: 1620 },
+        { id: "DLC3", filename: "ES2_Localization_DLC3_Locales.js", title: "Penumbra (DLC 3) wiki", stringCount: 1651 },
+        { id: "DLC4", filename: "ES2_Localization_DLC4_Locales.js", title: "Awakening (DLC 4) wiki", stringCount: 1007 },
+        { id: "DLC5", filename: "ES2_Localization_DLC5_Locales.js", title: "Dark Matter (DLC 5) wiki", stringCount: 127 },
+        { id: "Update11", filename: "ES2_Localization_Update11_Locales.js", title: "Stories (Update 11) wiki", stringCount: 14 },
+        { id: "Update12", filename: "ES2_Localization_Update12_Locales.js", title: "Celestial Worlds (Update 12) wiki", stringCount: 210 },
+        { id: "Update13", filename: "ES2_Localization_Update13_Locales.js", title: "Harmonic Memories (Update 13) wiki", stringCount: 2 },
+        { id: "Update14", filename: "ES2_Localization_Update14_Locales.js", title: "Update 14 wiki", stringCount: 69 },
+        { id: "Updates", filename: "ES2_Localization_Updates_Locales.js", title: "Community Updates wiki", stringCount: 1762 },
+        { id: "Vaulters", filename: "ES2_Localization_Vaulters_Locales.js", title: "Vaulters wiki", stringCount: 1001 },
+        { id: "Demo", filename: "ES2_Localization_Demo_Locales.js", title: "Demo wiki", stringCount: 70 }
+      ];
+      populateFileDropdown();
+    }
+
+    function populateFileDropdown() {
+      const sel = document.getElementById('file-select');
+      sel.innerHTML = fileList.map(f =>
+        `<option value="${f.filename}">${f.title} (${f.stringCount || '...'} strings)</option>`
+      ).join('');
+
+      // Check URL param ?file=...
+      const urlParams = new URLSearchParams(window.location.search);
+      const fileParam = urlParams.get('file');
+      if (fileParam && fileList.some(f => f.filename === fileParam || f.filename.includes(fileParam))) {
+        const match = fileList.find(f => f.filename === fileParam || f.filename.includes(fileParam));
+        sel.value = match.filename;
+      }
+      loadFile(sel.value);
+    }
+
+    async function loadFile(filename) {
+      if (!filename) return;
+      currentFileName = filename;
+      activeStringIndex = -1;
+      document.getElementById('filter-count').textContent = 'Loading file...';
+
+      try {
+        const res = await fetch(`/api/file?name=${encodeURIComponent(filename)}`);
+        if (res.ok) {
+          currentData = await res.json();
+          onDataLoaded();
+          return;
+        }
+      } catch (e) {}
+
+      showToast("Could not load from API server. Check if server.py is running.", true);
+    }
+
+    function onDataLoaded() {
+      // Populate category filter and datalist
+      const topSelect = document.getElementById('topic-select');
+      const dataList = document.getElementById('cat-datalist');
+
+      topSelect.innerHTML = '<option value="">All Topics (' + currentData.strings.length + ')</option>' +
+        currentData.categories.map(c => `<option value="${esc(c.name)}">${esc(c.name)} (${c.count})</option>`).join('');
+
+      dataList.innerHTML = currentData.categories.map(c => `<option value="${esc(c.name)}"></option>`).join('');
+
+      filterStrings();
+
+      // Check URL param ?key=... to select specific string
+      const urlParams = new URLSearchParams(window.location.search);
+      const keyParam = urlParams.get('key');
+      if (keyParam) {
+        const foundIdx = currentData.strings.findIndex(s => s.key === keyParam);
+        if (foundIdx >= 0) {
+          selectString(foundIdx);
+        }
+      }
+    }
+
+    // --- Filter & Pagination ---
+    function filterStrings() {
+      const topic = document.getElementById('topic-select').value;
+      const q = document.getElementById('search-input').value.trim().toLowerCase();
+
+      filteredIndices = [];
+      currentData.strings.forEach((s, idx) => {
+        if (topic && s.category !== topic) return;
+        if (q && !(s.key.toLowerCase().includes(q) || s.value.toLowerCase().includes(q))) return;
+        filteredIndices.push(idx);
+      });
+
+      currentPage = 1;
+      renderStringsList();
+      updateFilterCount();
+    }
+
+    function updateFilterCount() {
+      const total = currentData.strings.length;
+      const filtered = filteredIndices.length;
+      document.getElementById('filter-count').textContent =
+        `Showing ${filtered} of ${total} strings${dirtyCount > 0 ? ` (${dirtyCount} modified)` : ''}`;
+      document.getElementById('list-total-badge').textContent = `${filtered} strings`;
+    }
+
+    function changePage(delta) {
+      const maxPage = Math.max(1, Math.ceil(filteredIndices.length / PAGE_SIZE));
+      currentPage = Math.min(maxPage, Math.max(1, currentPage + delta));
+      renderStringsList();
+    }
+
+    function renderStringsList() {
+      const ul = document.getElementById('strings-list');
+      const start = (currentPage - 1) * PAGE_SIZE;
+      const end = Math.min(filteredIndices.length, start + PAGE_SIZE);
+      const pageIndices = filteredIndices.slice(start, end);
+
+      const maxPage = Math.max(1, Math.ceil(filteredIndices.length / PAGE_SIZE));
+      document.getElementById('page-info').textContent = `Page ${currentPage} of ${maxPage}`;
+      document.getElementById('btn-prev').disabled = currentPage <= 1;
+      document.getElementById('btn-next').disabled = currentPage >= maxPage;
+
+      if (filteredIndices.length === 0) {
+        ul.innerHTML = '<li style="padding:16px; text-align:center; color:#888;">No matching strings found.</li>';
+        return;
+      }
+
+      ul.innerHTML = pageIndices.map(dIdx => {
+        const s = currentData.strings[dIdx];
+        const isActive = dIdx === activeStringIndex;
+        return `
+          <li class="string-item${isActive ? ' active' : ''}" onclick="selectString(${dIdx})">
+            <div class="str-row-top">
+              <span class="str-key">${s.isModified ? '<span class="str-dirty" title="Modified"></span>' : ''}%${esc(s.key)}</span>
+              <span class="str-cat">${esc(s.category)}</span>
+            </div>
+            <div class="str-preview">${esc(s.value || '(empty)')}</div>
+          </li>
+        `;
+      }).join('');
+    }
+
+    // --- Inspector & Edit Logic ---
+    function selectString(dIdx) {
+      activeStringIndex = dIdx;
+      const s = currentData.strings[dIdx];
+      originalStringSnapshot = { ...s };
+
+      document.getElementById('inspector-title').textContent = `%${s.key}`;
+      document.getElementById('inp-key').value = s.key;
+      document.getElementById('inp-category').value = s.category;
+      document.getElementById('inp-value').value = s.value;
+
+      onValueInput();
+
+      if (isAuthenticated) {
+        enableInspector(true);
+      } else {
+        enableInspector(false);
+      }
+
+      renderStringsList();
+    }
+
+    function enableInspector(enabled) {
+      document.getElementById('inp-key').disabled = !enabled;
+      document.getElementById('inp-category').disabled = !enabled;
+      document.getElementById('inp-value').disabled = !enabled;
+      document.getElementById('btn-save-single').disabled = !enabled || activeStringIndex < 0;
+      document.getElementById('btn-revert').disabled = !enabled || activeStringIndex < 0;
+      document.getElementById('btn-delete').disabled = !enabled || activeStringIndex < 0;
+    }
+
+    function onValueInput() {
+      const val = document.getElementById('inp-value').value;
+      document.getElementById('char-count').textContent = `${val.length} characters`;
+      document.getElementById('live-preview').innerHTML = pretty(val) || '<span style="color:#888;">(empty)</span>';
+
+      if (activeStringIndex >= 0) {
+        const s = currentData.strings[activeStringIndex];
+        const newKey = document.getElementById('inp-key').value.trim();
+        const newCat = document.getElementById('inp-category').value.trim();
+
+        if (originalStringSnapshot) {
+          const isDirty = (val !== originalStringSnapshot.value || newKey !== originalStringSnapshot.key || newCat !== originalStringSnapshot.category);
+          s.isModified = isDirty;
+          s.value = val;
+          s.key = newKey || s.key;
+          s.category = newCat || s.category;
+        }
+        recalcDirtyCount();
+      }
+    }
+
+    function recalcDirtyCount() {
+      dirtyCount = currentData.strings.filter(s => s.isModified).length;
+      updateFilterCount();
+    }
+
+    function insertToken(prefix, suffix = '') {
+      if (!isAuthenticated) {
+        openAuthModal();
+        return;
+      }
+      const ta = document.getElementById('inp-value');
+      const start = ta.selectionStart;
+      const end = ta.selectionEnd;
+      const selected = ta.value.substring(start, end);
+      const replacement = prefix + selected + suffix;
+      ta.value = ta.value.substring(0, start) + replacement + ta.value.substring(end);
+      ta.selectionStart = ta.selectionEnd = start + replacement.length;
+      ta.focus();
+      onValueInput();
+    }
+
+    function revertActiveString() {
+      if (activeStringIndex < 0 || !originalStringSnapshot) return;
+      const s = currentData.strings[activeStringIndex];
+      s.key = originalStringSnapshot.key;
+      s.value = originalStringSnapshot.value;
+      s.category = originalStringSnapshot.category;
+      s.isModified = false;
+      selectString(activeStringIndex);
+      recalcDirtyCount();
+      showToast("Reverted string to original value.");
+    }
+
+    // --- Immediate Save to Git Repository ---
+    async function saveActiveString() {
+      if (!requireAuth()) return;
+      if (activeStringIndex < 0) return;
+
+      const s = currentData.strings[activeStringIndex];
+      s.key = document.getElementById('inp-key').value.trim();
+      s.category = document.getElementById('inp-category').value.trim() || 'General';
+      s.value = document.getElementById('inp-value').value;
+      s.isModified = false;
+      originalStringSnapshot = { ...s };
+
+      await sendSaveRequest(`Update '${s.key}' in ${currentFileName} via Wiki Editor`, s.key);
+    }
+
+    async function saveAllChanges() {
+      if (!requireAuth()) return;
+      await sendSaveRequest(`Save changes in ${currentFileName} via Wiki Editor`);
+    }
+
+    async function sendSaveRequest(commitMessage, keyHint = '') {
+      showToast("💾 Saving and committing changes to Git repository...");
+
+      try {
+        const payload = {
+          filename: currentFileName,
+          password: editorPassword,
+          strings: currentData.strings.map(s => ({
+            key: s.key,
+            value: s.value,
+            category: s.category
+          })),
+          commitMessage,
+          keyHint
+        };
+
+        const res = await fetch('/api/save', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-Editor-Password': editorPassword
+          },
+          body: JSON.stringify(payload)
+        });
+
+        const data = await res.json();
+        if (res.ok && data.success) {
+          // Clear all dirty markers
+          currentData.strings.forEach(s => { s.isModified = false; });
+          recalcDirtyCount();
+          renderStringsList();
+          updateGitStatus();
+          showToast(`✅ Saved & Committed to Git: ${data.commit} - ${data.message}`);
+        } else {
+          showToast(`❌ Save failed: ${data.error || 'Server error'}`, true);
+          if (res.status === 401) {
+            setLocked();
+            openAuthModal();
+          }
+        }
+      } catch (err) {
+        showToast(`❌ Network/Server error: ${err.message}`, true);
+      }
+    }
+
+    // --- Delete String ---
+    async function deleteActiveString() {
+      if (!requireAuth()) return;
+      if (activeStringIndex < 0) return;
+
+      const s = currentData.strings[activeStringIndex];
+      if (!confirm(`Are you sure you want to delete the string '%${s.key}'? This will immediately commit the deletion to the repository.`)) {
+        return;
+      }
+
+      const delKey = s.key;
+      currentData.strings.splice(activeStringIndex, 1);
+      activeStringIndex = -1;
+      originalStringSnapshot = null;
+      enableInspector(false);
+
+      filterStrings();
+      await sendSaveRequest(`Delete string '${delKey}' from ${currentFileName} via Wiki Editor`);
+    }
+
+    // --- Add String Modal ---
+    function openAddModal() {
+      if (!requireAuth()) return;
+      document.getElementById('add-error').style.display = 'none';
+      document.getElementById('new-key').value = '';
+      document.getElementById('new-category').value = document.getElementById('topic-select').value || 'General';
+      document.getElementById('new-value').value = '';
+      document.getElementById('add-modal').style.display = 'flex';
+      setTimeout(() => document.getElementById('new-key').focus(), 100);
+    }
+
+    function closeAddModal() {
+      document.getElementById('add-modal').style.display = 'none';
+    }
+
+    async function submitAddString() {
+      if (!requireAuth()) return;
+      const key = document.getElementById('new-key').value.trim();
+      const cat = document.getElementById('new-category').value.trim() || 'General';
+      const val = document.getElementById('new-value').value;
+      const errEl = document.getElementById('add-error');
+
+      if (!key) {
+        errEl.textContent = "String key cannot be empty.";
+        errEl.style.display = 'block';
+        return;
+      }
+
+      if (currentData.strings.some(s => s.key === key)) {
+        errEl.textContent = `A string with key '%${key}' already exists in this file.`;
+        errEl.style.display = 'block';
+        return;
+      }
+
+      closeAddModal();
+
+      const newStr = {
+        id: currentData.strings.length,
+        key,
+        value: val,
+        category: cat,
+        catIndex: 0,
+        isModified: false
+      };
+      currentData.strings.push(newStr);
+      filterStrings();
+      selectString(currentData.strings.length - 1);
+
+      await sendSaveRequest(`Add new string '${key}' to ${currentFileName} via Wiki Editor`, key);
+    }
+
+    // --- Find & Replace Modal ---
+    function openReplaceModal() {
+      if (!requireAuth()) return;
+      document.getElementById('find-query').value = '';
+      document.getElementById('replace-query').value = '';
+      document.getElementById('replace-preview-count').textContent = '';
+      document.getElementById('replace-modal').style.display = 'flex';
+      setTimeout(() => document.getElementById('find-query').focus(), 100);
+    }
+
+    function closeReplaceModal() {
+      document.getElementById('replace-modal').style.display = 'none';
+    }
+
+    async function submitBatchReplace() {
+      if (!requireAuth()) return;
+      const findText = document.getElementById('find-query').value;
+      const repText = document.getElementById('replace-query').value;
+      const matchCase = document.getElementById('match-case').checked;
+      const currentTopicOnly = document.getElementById('scope-topic').checked;
+      const topic = document.getElementById('topic-select').value;
+
+      if (!findText) {
+        alert("Please enter text to find.");
+        return;
+      }
+
+      let count = 0;
+      currentData.strings.forEach(s => {
+        if (currentTopicOnly && topic && s.category !== topic) return;
+        let matched = false;
+        if (matchCase) {
+          if (s.value.includes(findText)) {
+            s.value = s.value.split(findText).join(repText);
+            matched = true;
+          }
+        } else {
+          const regex = new RegExp(findText.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi');
+          if (regex.test(s.value)) {
+            s.value = s.value.replace(regex, repText);
+            matched = true;
+          }
+        }
+        if (matched) {
+          s.isModified = true;
+          count++;
+        }
+      });
+
+      closeReplaceModal();
+
+      if (count === 0) {
+        showToast("No matching strings found to replace.");
+        return;
+      }
+
+      filterStrings();
+      if (activeStringIndex >= 0) {
+        selectString(activeStringIndex);
+      }
+
+      await sendSaveRequest(`Batch replace '${findText}' -> '${repText}' in ${currentFileName} (${count} strings) via Wiki Editor`);
+    }
+
+    function requireAuth() {
+      if (!isAuthenticated) {
+        openAuthModal();
+        return false;
+      }
+      return true;
+    }
+
+    // --- Initialization ---
+    window.addEventListener('DOMContentLoaded', async () => {
+      checkStoredAuth();
+      await checkServer();
+      await updateGitStatus();
+      await loadFileList();
+
+      // If not authenticated, open password prompt
+      if (!isAuthenticated) {
+        openAuthModal();
+      }
+    });
+  </script>
+</body>
+</html>
