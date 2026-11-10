@@ -1,7 +1,8 @@
-const D=[["Update13Title","Harmonic Memories",0],["Update13Description","More than 6 years have passed since the release of the first Endless Space game... FlybyNo, decided to delve into the archives and remaster classic songs from the game that made what Amplitude Studios is today! Harmonic Memories also features the arrival of a new Harmony Hero, FES2 Reflects.",0]];
-const E=[[0,"Update","Update13",[["Title",0],["Description",1]]]];
-const C=[["Update",2]];
+const D=[["Update13Title", "Harmonic Memories (Remastered)", 0], ["Update13Description", "More than 6 years have passed since the release of the first Endless Space game... FlybyNo, decided to delve into the archives and remaster classic songs from the game that made what Amplitude Studios is today! Harmonic Memories also features the arrival of a new Harmony Hero, FES2 Reflects.", 0]];
+const E=[[0, "Update13", "Update13", [["Title", 0], ["Description", 1]]]];
+const C=[["Update", 2]];
 const B=[["Harmonic Memories","More than 6 years have passed since the release of the first Endless Space game... FlybyNo, decided to delve into the archives and remaster classic songs from the game that made what Amplitude Studios is today! Harmonic Memories also features the arrival of a new Harmony Hero, FES2 Reflects."]];
+
 
 const $=s=>document.querySelector(s);
 const esc=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
